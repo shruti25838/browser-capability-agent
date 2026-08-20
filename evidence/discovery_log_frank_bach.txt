@@ -1,0 +1,49 @@
+Discovery log -- "find the row for Frank Bach and extract his Due amount"
+==========================================================================
+
+This is the console log of the discovery run that produced
+evidence/artifact_example_frank_bach_due_amount.json (a copy of
+artifacts/find_the_row_for_frank_bach_and_extract__1787189101.json).
+
+Frank Bach was never used in any prior artifact in this repo (the earlier
+examples all used Jason Doe) -- this run exists specifically to stress-test
+generalization on genuinely new data, then get replayed against a third,
+still-different person (Tim Conway) with no prior artifact ever involving
+either of them. See replay_log_success_cross_person_generalization.txt for
+that replay.
+
+Command:
+    python discover.py --goal "find the row for Frank Bach and extract his Due amount" \
+        --target "https://the-internet.herokuapp.com/tables" \
+        --root-selector "#table1" \
+        --model gemini-3.6-flash
+
+(--model override needed because the project default, gemini-2.5-flash, has
+been deprecated by Google since this project was built: the API now returns
+404 NOT_FOUND for it and recommends gemini-3.6-flash instead.)
+
+--------------------------------------------------------------------------
+Starting discovery: goal='find the row for Frank Bach and extract his Due amount' target='https://the-internet.herokuapp.com/tables' domains=['the-internet.herokuapp.com']
+Discovery succeeded: Successfully found the row for Frank Bach and extracted his Due amount ($51.00).
+Artifact written to artifacts\find_the_row_for_frank_bach_and_extract__1787189101.json
+--------------------------------------------------------------------------
+
+Post-run verification performed (see conversation record / audit summary):
+  - artifact.scope_selector == "#table1"                                  [pass]
+  - person's name generalized into parameter {{person_name}}, never
+    hardcoded in any step                                                 [pass]
+  - the extracted literal "$51.00" does not appear anywhere in the
+    artifact JSON (grep, zero matches) -- extract postcondition and
+    success_condition are both kind=value_extracted on due_amount         [pass]
+
+Note on a discarded first attempt: an earlier discovery run for this same
+goal (same command, same model) produced a well-formed artifact except for
+one malformed step precondition (a row_visible check with no contains_text,
+which matches every row and is structurally meaningless). That artifact is
+kept as evidence/artifact_malformed_precondition_example.json -- see
+replay_log_hard_failure_ambiguous_match_organic.txt for how replay's new
+ROW_VISIBLE ambiguity check correctly caught it as a hard_failure instead of
+silently succeeding, which is how the defect was noticed in the first place.
+LLM output for a given goal is nondeterministic between runs; this second
+attempt (used throughout this evidence set) happened to produce a
+contains_text-based precondition instead.

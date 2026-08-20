@@ -1,0 +1,30 @@
+Replay log -- business_outcome (legitimate "not found", not a crash)
+==========================================================================
+
+Command:
+    python evidence/demo_business_outcome.py
+
+This replays artifacts/find_the_row_for_jason_doe_and_extract_h_1787179986.json
+with person_name="Nobody Fake" -- a name that does not exist in the table.
+find_row's ROW_VISIBLE precondition cleanly evaluates to "0 rows matched",
+which is exactly the case the business_outcome/hard_failure taxonomy is
+designed to treat as a legitimate answer, not a system failure.
+
+--------------------------------------------------------------------------
+{
+  "status": "business_outcome",
+  "reason": "Table contains row for Jason Doe (rows matching 'Nobody Fake': 0)",
+  "step": 0
+}
+
+OK: business_outcome demo behaved as expected. Saved to .../evidence/replay_result_business_outcome.json
+--------------------------------------------------------------------------
+
+Re-verified after the ROW_VISIBLE ambiguity fix (which now treats count()>1
+as a hard_failure): the observed message explicitly shows "0" matches, so
+this run exercises the pre-existing clean-count-0 path, not the new
+count()>1 ambiguity branch. No regression from that fix.
+
+See evidence/replay_result_business_outcome.json for the machine-readable
+result, and tests/test_replay_classification.py for the unit-level pin of
+this exact rule.

@@ -1,0 +1,22 @@
+{
+  "status": "hard_failure",
+  "step": 1,
+  "expected": "A link named 'Definitely Not A Real Link' exists in the row",
+  "observed": "count=0 visible=False",
+  "error": "condition not met after retries | human intervention attempted: human aborted",
+  "owner": "automation",
+  "escalated_to_human": true,
+  "recovered_via_retry": false,
+  "steps": [
+    {
+      "step": 0,
+      "recovered_via_retry": false,
+      "retry_count": 0
+    },
+    {
+      "step": 1,
+      "recovered_via_retry": false,
+      "retry_count": 2
+    }
+  ]
+}

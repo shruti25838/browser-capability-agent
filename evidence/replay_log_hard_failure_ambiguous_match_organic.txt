@@ -1,0 +1,89 @@
+Replay log -- hard_failure from a real (non-synthetic) discovered defect
+==========================================================================
+
+Unlike replay_log_hard_failure_escalation_synthetic.txt (a hand-built
+artifact deliberately constructed to fail), this is a hard_failure that
+emerged organically from a real LLM-discovered artifact:
+evidence/artifact_malformed_precondition_example.json (a copy of
+artifacts/find_the_row_for_frank_bach_and_extract__1787188912.json, from
+the FIRST of two discovery attempts for "find the row for Frank Bach and
+extract his Due amount" -- LLM output is nondeterministic, and this first
+attempt happened to produce a malformed step).
+
+The defect: the extract step's precondition is
+    {"kind": "row_visible", "contains_text": null, "locator": {"kind": "table_cell_by_column", ...}}
+ROW_VISIBLE only ever looks at contains_text (it ignores locator entirely).
+With contains_text empty, Playwright's has_text("") filter matches every
+row, so on #table1 (4 data rows + 1 header row, which also has role "row")
+count() == 5.
+
+Command (--no-escalation used only to get a clean read for this log; see
+the note on EscalationHandler's EOFError below for why):
+    python replay.py \
+        --artifact artifacts/find_the_row_for_frank_bach_and_extract__1787188912.json \
+        --params '{"target_name": "Bach Frank"}' \
+        --no-escalation
+
+--------------------------------------------------------------------------
+{
+  "status": "hard_failure",
+  "step": 1,
+  "expected": "Row for Frank Bach is selected",
+  "observed": "rows matching '': 5",
+  "error": "ambiguous match: 5 rows matched '', expected exactly 1"
+}
+--------------------------------------------------------------------------
+
+Confirmed this is a property of the artifact itself, not of which person is
+passed: replaying with "Conway Tim" instead of the original "Bach Frank"
+fails identically (same "5 rows matched ''" message) -- proving it isn't a
+generalization bug, it's a malformed condition that would break for any
+parameter value.
+
+Why this matters: before today's ROW_VISIBLE ambiguity fix, this exact
+condition would have silently PASSED (count=5 >= 1 -> found=True), meaning
+this defective artifact would have "succeeded" while never actually checking
+anything meaningful. The fix (count()>1 on ROW_VISIBLE is now an error,
+forcing hard_failure regardless of step type) is what surfaced this real
+defect instead of masking it -- a good demonstration of the fix's practical
+value, separate from its unit-test coverage in
+tests/test_replay_classification.py.
+
+Root cause (not fixed, flagged for a future pass): discovery never actually
+evaluates precondition/postcondition against the live page -- the model
+self-reports them narratively while acting, and replay is the first real
+enforcement of them. Neither tools.py's CONDITION_SCHEMA nor
+artifact_writer.py validates that a row_visible/row_absent condition
+actually carries a usable contains_text.
+
+Separate finding surfaced while producing this log: running the same replay
+WITHOUT --no-escalation correctly triggered escalation (screenshot taken:
+evidence/escalation_step1_1787188948.png) but then crashed with an
+unhandled EOFError from Python's input(), because this environment has no
+interactive stdin for EscalationHandler's default prompt to read from,
+instead of failing gracefully (e.g. treating EOF as an implicit abort). The
+screenshot from that crashed attempt has no matching intervention_log.jsonl
+entry, because the log write was ordered *after* the prompt call -- the
+crash happened before it was ever reached. evidence/escalation_step1_1787188948.png
+is kept deliberately as the "before" evidence of this exact bug.
+
+FIXED (in the same session, as a follow-up): agent/escalation_handler.py now
+(1) catches EOFError around the prompt call and returns a graceful
+hard_failure-compatible resolution ("escalation triggered but no interactive
+terminal was available for human input") instead of crashing, and (2) writes
+an "escalation_triggered" log entry immediately after the screenshot, BEFORE
+the blocking prompt is ever called -- so every screenshot now always has a
+matching log line, even if the prompt then fails. Re-running this exact
+scenario (same artifact, same params, no --no-escalation, stdin redirected
+from /dev/null) after the fix now returns a clean structured result instead
+of a traceback:
+    {
+      "status": "hard_failure",
+      "step": 1,
+      "expected": "Row for Frank Bach is selected",
+      "observed": "rows matching '': 5",
+      "error": "ambiguous match: 5 rows matched '', expected exactly 1 | human intervention attempted: escalation triggered but no interactive terminal was available for human input"
+    }
+See tests/test_escalation_handler.py for the regression coverage (mocks
+input() to raise EOFError and asserts a graceful result, plus asserts the
+screenshot-before-prompt log ordering).

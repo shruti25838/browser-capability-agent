@@ -1,0 +1,45 @@
+Replay log -- cross-person generalization proof
+==========================================================================
+
+One artifact (evidence/artifact_example_frank_bach_due_amount.json,
+discovered against Frank Bach only) replayed successfully against TWO
+different people via --params alone, with NO --root-selector passed on
+either replay -- the artifact's own scope_selector ("#table1") is what
+resolves the ambiguous two-table page correctly in both cases.
+
+--------------------------------------------------------------------------
+Replay 1 -- Frank Bach (the person actually used during discovery):
+
+    python replay.py \
+        --artifact artifacts/find_the_row_for_frank_bach_and_extract__1787189101.json \
+        --params '{"person_name": "Bach Frank"}'
+
+{
+  "status": "success",
+  "outputs": {
+    "due_amount": "$51.00"
+  }
+}
+
+--------------------------------------------------------------------------
+Replay 2 -- Tim Conway (NEVER seen during discovery of this artifact, and
+never used in any other artifact in this repo either):
+
+    python replay.py \
+        --artifact artifacts/find_the_row_for_frank_bach_and_extract__1787189101.json \
+        --params '{"person_name": "Conway Tim"}'
+
+{
+  "status": "success",
+  "outputs": {
+    "due_amount": "$50.00"
+  }
+}
+
+--------------------------------------------------------------------------
+Both amounts match the actual table data for each named person. This is the
+strongest proof in this evidence set that generalization actually works:
+discovery ran once, on one person, and the resulting artifact correctly
+replays end-to-end against a person it never saw -- with the scope_selector
+recorded on the artifact (not a hand-passed CLI flag) doing the disambiguation
+work needed on a page with two structurally identical tables.

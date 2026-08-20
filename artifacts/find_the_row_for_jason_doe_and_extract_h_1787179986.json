@@ -1,0 +1,102 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "goal": "find the row for Jason Doe and extract his Due amount",
+    "target_url": "https://the-internet.herokuapp.com/tables",
+    "created_at": "2026-08-19T22:53:06.595197Z"
+  },
+  "scope_selector": "#table1",
+  "parameters": [
+    {
+      "name": "person_name",
+      "type": "string",
+      "description": "Name of the person in the table",
+      "example_value": "Doe Jason"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "jason_doe_due_amount",
+      "type": "string",
+      "description": "Extract jason_doe_due_amount from {'kind': 'table_cell_by_column', 'column_header': 'Due', 'scope': 'row'}"
+    }
+  ],
+  "steps": [
+    {
+      "order": 0,
+      "type": "find_row",
+      "description": "Find the row containing 'Doe Jason'",
+      "precondition": {
+        "kind": "row_visible",
+        "description": "Table contains row for Jason Doe",
+        "locator": null,
+        "contains_text": "{{person_name}}",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "row_visible",
+        "description": "Row containing 'Doe Jason' is located",
+        "locator": null,
+        "contains_text": "{{person_name}}",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": null,
+      "contains_text": "{{person_name}}",
+      "input_text": null,
+      "output_field": null
+    },
+    {
+      "order": 1,
+      "type": "extract",
+      "description": "Extract jason_doe_due_amount from {'kind': 'table_cell_by_column', 'column_header': 'Due', 'scope': 'row'}",
+      "precondition": {
+        "kind": "row_visible",
+        "description": "Row for Jason Doe is selected",
+        "locator": null,
+        "contains_text": "{{person_name}}",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "value_extracted",
+        "description": "jason_doe_due_amount was extracted as a non-empty string value",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": "jason_doe_due_amount",
+        "expected_type": "string"
+      },
+      "locator": {
+        "kind": "table_cell_by_column",
+        "role": null,
+        "name": null,
+        "name_match": "exact",
+        "column_header": "Due",
+        "css_selector": null,
+        "scope": "row"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": "jason_doe_due_amount"
+    }
+  ],
+  "success_condition": {
+    "kind": "row_visible",
+    "description": "Row for Jason Doe is visible in the table",
+    "locator": null,
+    "contains_text": "{{person_name}}",
+    "expected_value": null,
+    "url_pattern": null,
+    "output_field": null,
+    "expected_type": null
+  }
+}

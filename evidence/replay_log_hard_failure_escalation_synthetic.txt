@@ -1,0 +1,60 @@
+Replay log -- hard_failure with full escalation flow (synthetic/controlled)
+==========================================================================
+
+Command:
+    python evidence/demo_hard_failure.py
+
+This uses a small hand-built artifact (evidence/hard_failure_demo_artifact.json,
+not produced by discovery) whose second step clicks a link that structurally
+does not exist in the matched row. That is a real break (element missing),
+not a legitimate business answer, so it must -- and does -- surface as
+hard_failure. Because escalation is on by default, this also exercises
+EscalationHandler end-to-end. The prompt is scripted to answer "abort"
+(standing in for an operator who isn't available), so the demo runs
+unattended; a real interactive run defaults to a blocking input() prompt.
+
+--------------------------------------------------------------------------
+=== ESCALATION: human intervention requested ===
+Goal:       deliberately broken demo: click a link that does not exist
+Step 1: Click a link that structurally does not exist in this row
+Expected:   A link named 'Definitely Not A Real Link' exists in the row
+Observed:   count=0 visible=False
+Error:      condition not met after retries
+Screenshot: evidence/escalation_step1_1787189936.png
+Reason stopped: precondition failed after retries
+{
+  "status": "hard_failure",
+  "step": 1,
+  "expected": "A link named 'Definitely Not A Real Link' exists in the row",
+  "observed": "count=0 visible=False",
+  "error": "condition not met after retries | human intervention attempted: human aborted"
+}
+
+OK: hard_failure demo behaved as expected (escalation + evidence trail in .../evidence).
+--------------------------------------------------------------------------
+
+Corresponding log entries in evidence/intervention_log.jsonl (two lines per
+escalation since the escalation_handler.py fix -- see below):
+    human_action: "escalation_triggered", resumed: null   (written BEFORE the prompt)
+    human_action: "aborted", resumed: false                (written after the prompt resolves)
+
+Corresponding screenshot: evidence/escalation_step1_1787189936.png (taken of
+the live page at the moment escalation fired, before the prompt blocks).
+
+Separately verified (not part of the committed demo script, since it needs a
+scripted "human" callback rather than a fixed "abort" response): a resume
+path where the scripted prompt injects the missing link into the live page
+before signaling resume. EscalationHandler's recheck() then passes, and
+ReplayEngine continues the SAME run() call, on the SAME page object, through
+to {"status": "success"}. Re-ran this after today's ROW_VISIBLE/scope_selector
+fixes and it still works correctly -- confirms scope_selector composes
+correctly with escalation too.
+
+UPDATE: this file's log entries and screenshot above are from a re-run
+performed *after* fixing the EscalationHandler EOFError bug (see
+replay_log_hard_failure_ambiguous_match_organic.txt for how that bug was
+found, and agent/escalation_handler.py / tests/test_escalation_handler.py
+for the fix). The two-line-per-escalation log shape (escalation_triggered,
+then the outcome) is the fix in action: the escalation_triggered line is
+now written before the blocking prompt, so a screenshot is never orphaned
+even if the prompt then crashes or has no stdin to read from.
