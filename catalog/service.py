@@ -18,6 +18,11 @@ not reimplemented. The HTTP surface never exposes a way to loosen a
 guardrail tier: `allow_confirmed_actions` is never taken from the request,
 so invoking a capability is never a way around what --allow-confirmed-actions
 gates on the CLI.
+
+Every invoke also appends a run-log record (see catalog/run_log.py) as a
+side effect, for the eval dashboard (dashboard/app.py) to read -- purely
+additive: a run-log write failure is swallowed, never surfaced as an
+invoke error, and the response returned to the caller is unchanged.
 """
 
 from __future__ import annotations
@@ -35,6 +40,8 @@ from agent.discovery_agent import DEFAULT_ALLOWED_ACTIONS
 from agent.guardrails import GuardrailChecker
 from agent.redaction import redact_mapping
 from replay.replay_engine import ReplayEngine
+
+from .run_log import DEFAULT_RUN_LOG_PATH, append_run
 
 DEFAULT_ARTIFACTS_DIR = "artifacts"
 
@@ -144,7 +151,7 @@ def get_replay_runner() -> ReplayRunner:
 # -- app -----------------------------------------------------------------------
 
 
-def create_app(artifacts_dir: str = DEFAULT_ARTIFACTS_DIR) -> FastAPI:
+def create_app(artifacts_dir: str = DEFAULT_ARTIFACTS_DIR, run_log_path: str = DEFAULT_RUN_LOG_PATH) -> FastAPI:
     app = FastAPI(
         title="interface.ai capability catalog",
         description="Agent-facing catalog of saved replay artifacts, callable by name.",
@@ -184,6 +191,14 @@ def create_app(artifacts_dir: str = DEFAULT_ARTIFACTS_DIR) -> FastAPI:
             )
 
         result = replay_runner(artifact, params)
+
+        # Side effect only -- never allowed to change the response or fail the request.
+        # A full disk or a bad run_log_path must not turn a successful invoke into an error.
+        try:
+            append_run(run_log_path, name, params, result)
+        except OSError:
+            pass
+
         # Same redaction contract as replay.py's own console print: never redact `outputs`,
         # the artifact's own declared, deliberately-returned data.
         return redact_mapping(result, protected_keys=frozenset({"outputs"}))
@@ -191,4 +206,7 @@ def create_app(artifacts_dir: str = DEFAULT_ARTIFACTS_DIR) -> FastAPI:
     return app
 
 
-app = create_app(os.environ.get("CATALOG_ARTIFACTS_DIR", DEFAULT_ARTIFACTS_DIR))
+app = create_app(
+    os.environ.get("CATALOG_ARTIFACTS_DIR", DEFAULT_ARTIFACTS_DIR),
+    os.environ.get("CATALOG_RUN_LOG_PATH", DEFAULT_RUN_LOG_PATH),
+)

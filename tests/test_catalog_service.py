@@ -24,6 +24,7 @@ from agent.artifact import (
     Step,
     StepType,
 )
+from catalog.run_log import load_runs
 from catalog.service import create_app, get_replay_runner
 
 
@@ -185,7 +186,7 @@ def test_get_unknown_capability_is_404(tmp_path):
 
 def test_invoke_with_valid_params_returns_the_replay_engines_result(tmp_path):
     _write_artifacts(tmp_path)
-    app = create_app(str(tmp_path))
+    app = create_app(str(tmp_path), str(tmp_path / "run_log.jsonl"))
     captured = {}
 
     def fake_runner(artifact, params):
@@ -210,7 +211,7 @@ def test_invoke_with_valid_params_returns_the_replay_engines_result(tmp_path):
 
 def test_invoke_business_outcome_and_hard_failure_pass_through_unmodified(tmp_path):
     _write_artifacts(tmp_path)
-    app = create_app(str(tmp_path))
+    app = create_app(str(tmp_path), str(tmp_path / "run_log.jsonl"))
 
     for canned in (
         {"status": "business_outcome", "outcome_name": "not_found", "reason": "no such row"},
@@ -230,7 +231,7 @@ def test_invoke_business_outcome_and_hard_failure_pass_through_unmodified(tmp_pa
 
 def test_invoke_redacts_incidental_sensitive_looking_text_but_not_outputs(tmp_path):
     _write_artifacts(tmp_path)
-    app = create_app(str(tmp_path))
+    app = create_app(str(tmp_path), str(tmp_path / "run_log.jsonl"))
     app.dependency_overrides[get_replay_runner] = lambda: (
         lambda a, p: {
             "status": "hard_failure",
@@ -294,6 +295,61 @@ def test_invoke_on_unknown_capability_is_404_before_touching_replay(tmp_path):
     resp = client.post("/capabilities/does-not-exist/invoke", json={})
 
     assert resp.status_code == 404
+
+
+# -- run-log side effect -------------------------------------------------------
+
+
+def test_invoke_appends_a_run_log_record_without_changing_the_response(tmp_path):
+    _write_artifacts(tmp_path)
+    run_log_path = str(tmp_path / "run_log.jsonl")
+    app = create_app(str(tmp_path), run_log_path)
+    app.dependency_overrides[get_replay_runner] = lambda: (
+        lambda a, p: {
+            "status": "success",
+            "outputs": {"error_message": "Your password is invalid!"},
+            "recovered_via_retry": True,
+            "steps": [{"step": 0, "recovered_via_retry": True, "retry_count": 2}],
+        }
+    )
+    client = TestClient(app)
+
+    resp = client.post(
+        "/capabilities/attempt_to_log_in_with_username_tomsmith_1787678625/invoke",
+        json={"username": "tomsmith", "password": "wrongpassword"},
+    )
+
+    # The response is exactly what it would have been with no run-log at all.
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "success"
+
+    runs = load_runs(run_log_path)
+    assert len(runs) == 1
+    assert runs[0]["capability"] == "attempt_to_log_in_with_username_tomsmith_1787678625"
+    assert runs[0]["status"] == "success"
+    assert runs[0]["recovered_via_retry"] is True
+    assert runs[0]["retry_count"] == 2
+    # Params land in the log redacted the same way any other free text is.
+    assert runs[0]["params"]["username"] == "tomsmith"
+
+
+def test_invoke_response_unaffected_when_run_log_write_fails(tmp_path):
+    # A directory in place of the log file makes the write raise OSError/IsADirectoryError
+    # -- confirms the try/except in catalog/service.py swallows it rather than 500ing.
+    _write_artifacts(tmp_path)
+    bad_run_log_path = str(tmp_path / "run_log_is_a_dir.jsonl")
+    (tmp_path / "run_log_is_a_dir.jsonl").mkdir()
+    app = create_app(str(tmp_path), bad_run_log_path)
+    app.dependency_overrides[get_replay_runner] = lambda: (lambda a, p: {"status": "success", "outputs": {}})
+    client = TestClient(app)
+
+    resp = client.post(
+        "/capabilities/attempt_to_log_in_with_username_tomsmith_1787678625/invoke",
+        json={"username": "tomsmith", "password": "wrongpassword"},
+    )
+
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "success"
 
 
 def test_default_replay_runner_dependency_is_the_real_run_replay_function():
