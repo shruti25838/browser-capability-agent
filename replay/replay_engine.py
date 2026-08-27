@@ -403,8 +403,16 @@ class ReplayEngine:
         return ConditionCheck(visible if want_visible else not visible, observed)
 
     def _check_text(self, condition: Condition, current_row, contains: bool) -> ConditionCheck:
+        expected = condition.expected_value or ""
         if condition.locator is None:
-            return ConditionCheck(False, "no locator on condition", error="condition missing locator")
+            # No specific element to read -- this condition is about page content in
+            # general (e.g. "an error message is displayed somewhere"), not one element.
+            # Fall back to the scoped root's plain visible text instead of demanding a
+            # locator that was never declared.
+            text_value = self.perceiver.visible_text().strip()
+            observed = f"page_text (len={len(text_value)})"
+            matched = (expected in text_value) if contains else (text_value == expected)
+            return ConditionCheck(matched, observed)
         if condition.locator.scope == "row" and current_row is None:
             return ConditionCheck(False, "row-scoped condition before any find_row", error="no current row")
         base = current_row if condition.locator.scope == "row" else self.perceiver.root
@@ -413,7 +421,6 @@ class ReplayEngine:
         if count != 1:
             return ConditionCheck(False, f"expected exactly one element, found {count}")
         text_value = target.first.inner_text(timeout=CHECK_TIMEOUT_MS).strip()
-        expected = condition.expected_value or ""
         observed = f"text={text_value!r}"
         return ConditionCheck((expected in text_value) if contains else (text_value == expected), observed)
 

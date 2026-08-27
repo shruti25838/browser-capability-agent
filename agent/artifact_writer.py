@@ -42,7 +42,17 @@ class ArtifactWriter:
         # condition asserting a genuinely fixed constant. The former is discovery-run-specific
         # (it will differ for any other input) and must be generalized; the latter is stable
         # across replays and should stay a literal.
+        #
+        # Two sources feed this map: `run.outputs` is the model's own self-report at finish
+        # time; each extract step's `output_value` is ground truth captured directly from the
+        # Playwright call during execution, independent of whether the model echoes it back
+        # correctly (or at all). The latter is a backstop -- self-report can drift or be
+        # incomplete, but what was actually read off the page during this run is always
+        # exactly what must not be hardcoded.
         output_value_to_field = {value: field for field, value in run.outputs.items()}
+        for es in run.steps:
+            if es.type == "extract" and es.output_field and es.output_value:
+                output_value_to_field.setdefault(es.output_value, es.output_field)
         output_field_to_type = {
             es.output_field: es.output_type for es in run.steps if es.type == "extract" and es.output_field
         }

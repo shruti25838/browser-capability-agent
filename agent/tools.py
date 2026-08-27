@@ -199,7 +199,7 @@ FINISH_TOOL = {
             },
             "success_condition": CONDITION_SCHEMA,
         },
-        "required": ["success", "reason", "parameters", "success_condition"],
+        "required": ["success", "reason", "outputs", "parameters", "success_condition"],
         "additionalProperties": False,
     },
 }

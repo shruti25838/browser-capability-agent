@@ -24,6 +24,7 @@ from agent.discovery_agent import DEFAULT_ALLOWED_ACTIONS
 from agent.escalation_handler import EscalationHandler
 from agent.guardrails import GuardrailChecker
 from agent.redaction import redact_mapping
+from operator_console.console import OperatorConsoleServer, WebConsoleEscalationHandler
 from replay.replay_engine import ReplayEngine
 
 
@@ -60,6 +61,16 @@ def main() -> int:
         help="Disable automatic human escalation on hard_failure (returns hard_failure immediately instead)",
     )
     parser.add_argument("--evidence-dir", default="evidence", help="Directory to write escalation screenshots/logs to")
+    parser.add_argument(
+        "--operator-console",
+        action="store_true",
+        help=(
+            "On a hard_failure, ask for the human's resume/abort decision through a small local "
+            "web console instead of a terminal prompt. Same blocking-wait, same audit log, same "
+            "live browser session -- only the input channel changes. Ignored if --no-escalation "
+            "is also passed. Has no effect on default behavior unless passed explicitly."
+        ),
+    )
     args = parser.parse_args()
 
     artifact = Artifact.from_json_file(args.artifact)
@@ -80,25 +91,42 @@ def main() -> int:
         allowed_actions=DEFAULT_ALLOWED_ACTIONS,
         allow_confirmed_actions=args.allow_confirmed_actions,
     )
-    escalation_handler = None if args.no_escalation else EscalationHandler(evidence_dir=args.evidence_dir)
     # The artifact's own scope_selector (recorded at discovery time) is the default source of
     # truth; an explicit --root-selector on this CLI overrides it.
     root_selector = args.root_selector or artifact.scope_selector
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=not args.headed)
-        page = browser.new_page()
-        try:
-            page.goto(artifact.metadata.target_url)
-            engine = ReplayEngine(
-                page=page,
-                guardrail=guardrail,
-                root_selector=root_selector,
-                escalation_handler=escalation_handler,
-            )
-            result = engine.run(artifact, params)
-        finally:
-            browser.close()
+    console_server = None
+    if args.no_escalation:
+        escalation_handler = None
+    elif args.operator_console:
+        # Started in THIS process, same as the browser below -- the console is only a
+        # replacement input channel/display, never a place browser control moves to.
+        console_server = OperatorConsoleServer(evidence_dir=args.evidence_dir).start()
+        print(f"Operator console: {console_server.base_url}  (open this in a browser to resume/abort)")
+        escalation_handler = WebConsoleEscalationHandler(
+            console_url=console_server.base_url, evidence_dir=args.evidence_dir
+        )
+    else:
+        escalation_handler = EscalationHandler(evidence_dir=args.evidence_dir)
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=not args.headed)
+            page = browser.new_page()
+            try:
+                page.goto(artifact.metadata.target_url)
+                engine = ReplayEngine(
+                    page=page,
+                    guardrail=guardrail,
+                    root_selector=root_selector,
+                    escalation_handler=escalation_handler,
+                )
+                result = engine.run(artifact, params)
+            finally:
+                browser.close()
+    finally:
+        if console_server is not None:
+            console_server.shutdown()
 
     # Redact incidental sensitive-looking data from the console print (reason/expected/
     # observed/error may echo page content) -- but never from "outputs", the artifact's

@@ -1,0 +1,234 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "goal": "attempt to log in with username tomsmith and password wrongpassword and capture the resulting error message",
+    "target_url": "https://the-internet.herokuapp.com/login",
+    "created_at": "2026-08-25T17:23:45.146881Z"
+  },
+  "scope_selector": null,
+  "parameters": [
+    {
+      "name": "username",
+      "type": "string",
+      "description": "Username for login",
+      "example_value": "tomsmith"
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "Password for login",
+      "example_value": "wrongpassword"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "error_message",
+      "type": "string",
+      "description": "Extract error_message from {'kind': 'css', 'css_selector': '#flash', 'scope': 'page'}"
+    }
+  ],
+  "steps": [
+    {
+      "order": 0,
+      "type": "type",
+      "description": "Type into textbox 'Username'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Username textbox is visible",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Username",
+          "name_match": "exact",
+          "column_header": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Username textbox contains tomsmith",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Username",
+          "name_match": "exact",
+          "column_header": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "Username",
+        "name_match": "exact",
+        "column_header": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{username}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 1,
+      "type": "type",
+      "description": "Type into textbox 'Password'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Password textbox is visible",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Password",
+          "name_match": "exact",
+          "column_header": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Password textbox contains password",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Password",
+          "name_match": "exact",
+          "column_header": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "textbox",
+        "name": "Password",
+        "name_match": "exact",
+        "column_header": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{password}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 2,
+      "type": "click",
+      "description": "Click button '\\uf090 Login'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Login button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": " Login",
+          "name_match": "exact",
+          "column_header": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Page reloaded or flash message displayed",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/login",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": " Login",
+        "name_match": "exact",
+        "column_header": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 3,
+      "type": "extract",
+      "description": "Extract error_message from {'kind': 'css', 'css_selector': '#flash', 'scope': 'page'}",
+      "precondition": {
+        "kind": "text_contains",
+        "description": "Error message visible",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": "Your password is invalid!",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_contains",
+        "description": "Error message extracted",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": "Your password is invalid!",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "css",
+        "role": null,
+        "name": null,
+        "name_match": "exact",
+        "column_header": null,
+        "css_selector": "#flash",
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": "error_message",
+      "outcome_mapping": []
+    }
+  ],
+  "success_condition": {
+    "kind": "text_contains",
+    "description": "Error message is displayed on page",
+    "locator": null,
+    "contains_text": null,
+    "expected_value": "Your password is invalid!",
+    "url_pattern": null,
+    "output_field": null,
+    "expected_type": null
+  }
+}

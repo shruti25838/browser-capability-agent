@@ -150,6 +150,12 @@ class ExecutedStep:
     input_text: Optional[str] = None
     output_field: Optional[str] = None
     output_type: str = "string"
+    # For type=="extract": the literal text actually read off the page during this run,
+    # captured directly from the Playwright call regardless of whether the model also
+    # echoes it back in `outputs` at finish time. Backstops ArtifactWriter's
+    # VALUE_EXTRACTED generalization (see artifact_writer.py) against a run that never
+    # declares `outputs` at all -- ground truth from execution, not self-report.
+    output_value: Optional[str] = None
     # Optional named business-outcome branches (see agent/artifact.py's OutcomeRule) --
     # each item is {"outcome_name": str, "condition": dict-shaped-like-a-Condition}.
     outcome_mapping: list[dict] = field(default_factory=list)
@@ -473,6 +479,7 @@ class DiscoveryAgent:
                     locator=locator_dict,
                     output_field=output_field,
                     output_type=tool_input.get("output_type", "string"),
+                    output_value=value,
                     outcome_mapping=tool_input.get("outcome_mapping") or [],
                 )
             )

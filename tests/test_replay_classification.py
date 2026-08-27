@@ -88,12 +88,13 @@ class FakePerceiver:
     """Double for agent.perceiver.Perceiver, swapped onto a real ReplayEngine
     instance after construction so no Playwright Page is ever touched."""
 
-    def __init__(self, find_row_result=None, root: Optional[FakeLocator] = None):
+    def __init__(self, find_row_result=None, root: Optional[FakeLocator] = None, visible_text_result: str = ""):
         # find_row_result: a FakeLocator, an Exception instance to raise, or a
         # callable(call_number) -> FakeLocator | Exception for multi-attempt scenarios.
         self.find_row_result = find_row_result
         self.find_row_calls = 0
         self.root = root if root is not None else FakeLocator(count=0, visible=False)
+        self.visible_text_result = visible_text_result
 
     def find_row(self, contains_text: str):
         self.find_row_calls += 1
@@ -105,19 +106,24 @@ class FakePerceiver:
     def resolve_column_index(self, column_header: str) -> int:
         raise NotImplementedError("not exercised by these tests")
 
+    def visible_text(self) -> str:
+        return self.visible_text_result
+
 
 class StubPage:
     def __init__(self, url: str = "https://the-internet.herokuapp.com/tables"):
         self.url = url
 
 
-def _make_engine(find_row_result=None, root: Optional[FakeLocator] = None) -> ReplayEngine:
+def _make_engine(
+    find_row_result=None, root: Optional[FakeLocator] = None, visible_text_result: str = ""
+) -> ReplayEngine:
     guardrail = GuardrailChecker(
         allowed_domains=["the-internet.herokuapp.com"],
         allowed_actions=["find_row", "click", "type", "extract"],
     )
     engine = ReplayEngine(page=StubPage(), guardrail=guardrail, retry_wait_s=0.0)
-    engine.perceiver = FakePerceiver(find_row_result=find_row_result, root=root)
+    engine.perceiver = FakePerceiver(find_row_result=find_row_result, root=root, visible_text_result=visible_text_result)
     return engine
 
 
@@ -304,6 +310,46 @@ def test_check_with_retries_gives_up_after_max_retries():
 
     assert check.passed is False
     assert engine.perceiver.find_row_calls == 3  # 1 initial + 2 retries, no more
+
+
+# -- text_contains/text_equals with no element locator (page-text fallback) --
+
+
+def test_text_contains_with_no_locator_matches_against_page_visible_text():
+    # A condition like "an error message is displayed somewhere" has no role/name/
+    # css_selector to build a Locator from -- it must be checked against the page's
+    # (or scoped root's) visible text instead of raising "condition missing locator".
+    engine = _make_engine(visible_text_result="Login Page\nYour password is invalid!\n×")
+    condition = Condition(
+        kind=ConditionKind.TEXT_CONTAINS, description="error visible", expected_value="Your password is invalid!"
+    )
+
+    check = engine._check_condition(condition, current_row=None)
+
+    assert check.passed is True
+    assert check.error is None
+
+
+def test_text_contains_with_no_locator_and_no_match_is_clean_false_not_error():
+    engine = _make_engine(visible_text_result="Login Page")
+    condition = Condition(
+        kind=ConditionKind.TEXT_CONTAINS, description="error visible", expected_value="Your password is invalid!"
+    )
+
+    check = engine._check_condition(condition, current_row=None)
+
+    assert check.passed is False
+    assert check.error is None
+
+
+def test_text_equals_with_no_locator_checks_full_page_text_exactly():
+    engine = _make_engine(visible_text_result="Just this")
+    condition = Condition(kind=ConditionKind.TEXT_EQUALS, description="page reads exactly", expected_value="Just this")
+
+    check = engine._check_condition(condition, current_row=None)
+
+    assert check.passed is True
+    assert check.error is None
 
 
 # -- direct unit tests of the classification matrix --------------------------

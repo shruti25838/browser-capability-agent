@@ -235,6 +235,75 @@ def test_outcome_mapping_populates_from_discovery_run_and_reuses_generalization(
     assert rule.condition.contains_text == "{{person_name}}"
 
 
+# -- output_value backstop (generalization net without a declared `outputs`) --
+
+
+def _run_with_extracted_literal_but_no_declared_outputs() -> DiscoveryRun:
+    # The model declared nothing in `outputs` at finish time (run.outputs={}) -- only the
+    # extract step's own `output_value`, captured directly from execution, is available.
+    extract_step = ExecutedStep(
+        order=1,
+        type="extract",
+        description="Extract error_message",
+        precondition=_row_visible(),
+        postcondition={
+            "kind": "text_equals",
+            "description": "Extracted error message",
+            "expected_value": "Your password is invalid!",
+        },
+        output_field="error_message",
+        output_type="string",
+        output_value="Your password is invalid!",
+    )
+    return DiscoveryRun(
+        goal="attempt login with wrong password",
+        target_url="https://the-internet.herokuapp.com/login",
+        success=True,
+        reason="done",
+        steps=[_find_row_step(), extract_step],
+        outputs={},
+        parameter_candidates=[],
+        success_condition={
+            "kind": "text_equals",
+            "description": "Error message is displayed",
+            "expected_value": "Your password is invalid!",
+        },
+    )
+
+
+def test_output_value_backstop_generalizes_postcondition_when_run_declares_no_outputs():
+    run = _run_with_extracted_literal_but_no_declared_outputs()
+
+    artifact = ArtifactWriter().build(run)
+
+    extract_postcondition = artifact.steps[1].postcondition
+    assert extract_postcondition.kind == ConditionKind.VALUE_EXTRACTED
+    assert extract_postcondition.output_field == "error_message"
+    assert extract_postcondition.expected_value is None
+
+
+def test_output_value_backstop_generalizes_success_condition_when_run_declares_no_outputs():
+    run = _run_with_extracted_literal_but_no_declared_outputs()
+
+    artifact = ArtifactWriter().build(run)
+
+    assert artifact.success_condition.kind == ConditionKind.VALUE_EXTRACTED
+    assert artifact.success_condition.output_field == "error_message"
+    assert artifact.success_condition.expected_value is None
+
+
+def test_unrelated_output_value_on_a_non_extract_step_does_not_cause_generalization():
+    # output_value is only ever set on extract steps (see agent/discovery_agent.py) --
+    # confirm a step with no output_field/output_value (e.g. find_row) contributes nothing
+    # to the backstop map and a genuine constant elsewhere still survives untouched.
+    run = _run_with_extracted_literal_but_no_declared_outputs()
+    assert run.steps[0].output_value is None  # the find_row step
+
+    artifact = ArtifactWriter().build(run)
+
+    assert artifact.steps[0].postcondition.kind == ConditionKind.ROW_VISIBLE
+
+
 def test_step_with_no_outcome_mapping_in_discovery_run_gets_empty_list():
     run = DiscoveryRun(
         goal="test",

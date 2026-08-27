@@ -52,6 +52,17 @@ class Perceiver:
             accessibility_tree=tree,
         )
 
+    def visible_text(self) -> str:
+        """Plain visible text of the scoped root (or the whole page body).
+
+        Fallback signal for a text_contains/text_equals condition that asserts
+        something about page content in general (e.g. a flash message) rather
+        than one specific element -- such a condition has no role/name/
+        css_selector to build a Locator from, so there's nothing else to read.
+        """
+        root = self.root if self.root_selector else self.page.locator("body")
+        return root.inner_text()
+
     def find_row(self, contains_text: str):
         """Locate the table row whose content contains `contains_text`.
 

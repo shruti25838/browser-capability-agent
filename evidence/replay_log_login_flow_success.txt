@@ -1,0 +1,142 @@
+Replay log -- login flow artifact replayed with VALID credentials
+==========================================================================
+
+Filename note: "success" here names the SCENARIO (credentials that log in
+successfully), not the replay status. Neither replay below returns
+"status": "success" -- see evidence/discovery_log_login_flow.txt for why.
+
+Artifact under test:
+    evidence/artifact_login_invalid_credentials.json
+    (== artifacts/attempt_to_log_in_with_username_tomsmith_1787678625.json)
+
+Discovered against tomsmith / wrongpassword. The question this log answers:
+when the same artifact is replayed with credentials that behave DIFFERENTLY
+(a real login that redirects to /secure instead of showing a flash error),
+does the artifact report a different outcome, or does it wrongly insist on
+the "invalid" result it was discovered with?
+
+Both replays were run with --no-escalation. That is deliberate: the default
+EscalationHandler appends to the existing, hash-chained
+evidence/intervention_log.jsonl and writes a screenshot into evidence/, and
+these runs were required not to modify any existing evidence file. It also
+avoids blocking on an interactive stdin prompt. --no-escalation changes only
+whether a human is offered the page; the classification itself is identical.
+
+--------------------------------------------------------------------------
+REPLAY A -- control: the artifact's own discovery path (wrong password)
+
+    python replay.py \
+        --artifact artifacts/attempt_to_log_in_with_username_tomsmith_1787678625.json \
+        --params '{"username": "tomsmith", "password": "wrongpassword"}' \
+        --no-escalation
+
+{
+  "status": "hard_failure",
+  "step": 3,
+  "expected": "Error message visible",
+  "observed": "no locator on condition",
+  "error": "condition missing locator",
+  "owner": "automation",
+  "escalated_to_human": false,
+  "recovered_via_retry": false,
+  "steps": [
+    {"step": 0, "recovered_via_retry": false, "retry_count": 0},
+    {"step": 1, "recovered_via_retry": false, "retry_count": 0},
+    {"step": 2, "recovered_via_retry": false, "retry_count": 0},
+    {"step": 3, "recovered_via_retry": false, "retry_count": 2}
+  ]
+}
+
+The artifact does not replay even on the exact path it was discovered on.
+Step 3's precondition is a `text_contains` carrying an expected_value but
+no locator, so replay has nothing to read text from. This is an `error`,
+not a clean False, so it is a hard_failure by design and no outcome_mapping
+rule could have changed it (replay/replay_engine.py:446 -- outcome rules
+are only consulted when `check.error is None`).
+
+Steps 0-2 did pass, which is the useful part of this control: parameter
+substitution works. {{username}} and {{password}} resolved, both fields
+were filled, and the " Login" button was found and clicked by its exact
+accessible name including the leading icon glyph.
+
+--------------------------------------------------------------------------
+REPLAY B -- the actual question: VALID credentials
+
+    python replay.py \
+        --artifact artifacts/attempt_to_log_in_with_username_tomsmith_1787678625.json \
+        --params '{"username": "tomsmith", "password": "SuperSecretPassword!"}' \
+        --no-escalation
+
+{
+  "status": "hard_failure",
+  "step": 2,
+  "expected": "Page reloaded or flash message displayed",
+  "observed": "url='https://the-internet.herokuapp.com/secure'",
+  "error": "condition not met after retries",
+  "owner": "automation",
+  "escalated_to_human": false,
+  "recovered_via_retry": false,
+  "steps": [
+    {"step": 0, "recovered_via_retry": false, "retry_count": 0},
+    {"step": 1, "recovered_via_retry": false, "retry_count": 0},
+    {"step": 2, "recovered_via_retry": false, "retry_count": 2}
+  ]
+}
+
+--------------------------------------------------------------------------
+WHAT REPLAY B ACTUALLY SHOWS
+--------------------------------------------------------------------------
+
+Good news first, on the narrow question asked: the artifact did NOT
+hardcode the "invalid_credentials" result. It fails EARLIER (step 2, not
+step 3), it never reaches the hardcoded "Your password is invalid!"
+conditions, and the `observed` field correctly reports the real, different
+page state: url='https://the-internet.herokuapp.com/secure'. A genuinely
+overfitted artifact would have claimed the invalid-password result here.
+Parameterization is doing its job -- the password really is an input, and
+changing it really does change the observed behavior.
+
+But the outcome is still reported as a generic hard_failure, and this is
+precisely the gap the outcome_mapping feature exists to close:
+
+  step 2 postcondition: {"kind": "url_contains", "url_pattern": "/login",
+                         "description": "Page reloaded or flash message displayed"}
+
+  With a valid password the browser redirects to /secure, so this condition
+  is cleanly FALSE (note `error: "condition not met after retries"` -- the
+  clean-false path, not an exception). Replay then walks
+  step.outcome_mapping looking for a named business outcome... and the list
+  is empty. It is not a find_row step, so the built-in row_visible/row_absent
+  exemption does not apply either. Everything falls through to hard_failure.
+
+A successful login is not a system break. It is a perfectly legitimate,
+distinguishable business result of "attempt to log in", and the machinery
+to name it already exists and works -- it just was not populated by
+discovery. Two rules on step 2 would have been enough:
+
+  outcome_mapping: [
+    {"outcome_name": "invalid_credentials",
+     "condition": {"kind": "text_contains", role/name on the #flash node,
+                   "expected_value": "Your password is invalid!"}},
+    {"outcome_name": "login_succeeded",
+     "condition": {"kind": "url_contains", "url_pattern": "/secure"}}
+  ]
+
+Note the ordering constraint that falls out of the replay contract: for an
+outcome rule to ever be reached, the step's own postcondition has to be the
+path you consider "the flow proceeding", and each named alternative has to
+be a rule. Here the model wrote the postcondition as the invalid path (the
+one it happened to observe during discovery), which is honest reporting of
+what it saw but leaves the success path with nowhere to land except
+hard_failure.
+
+--------------------------------------------------------------------------
+SUMMARY OF THE THREE OUTCOMES OBSERVED
+--------------------------------------------------------------------------
+
+  wrong password (discovery path):  hard_failure @ step 3, missing locator
+  valid password:                   hard_failure @ step 2, url is /secure
+  named business outcome:           never produced -- no outcome_mapping
+                                    rule exists anywhere in this artifact
+
+No existing artifact or evidence file was modified by these runs.

@@ -1,0 +1,188 @@
+Discovery log -- login flow with invalid credentials (outcome_mapping probe)
+==========================================================================
+
+This run exists to test one specific question: does the discovery LLM
+propose an `outcome_mapping` rule on a NON-find_row step, so that a failed
+login is classified as a named business outcome ("invalid_credentials")
+rather than a hard_failure?
+
+Short answer from this run: NO. The model produced a well-formed flow but
+left `outcome_mapping` empty on all four steps, and instead hardcoded the
+error string "Your password is invalid!" into two step conditions and the
+success_condition. Details and the exact evidence are below.
+
+Target:              https://the-internet.herokuapp.com/login
+Valid credentials:   tomsmith / SuperSecretPassword!
+Invalid credentials: tomsmith / wrongpassword   (used for this run)
+Model:               gemini-3.6-flash (the project default in
+                     agent/discovery_agent.py -- no --model override needed)
+
+Command (run exactly as given, headed so the flow could be watched):
+
+    python discover.py \
+        --goal "attempt to log in with username tomsmith and password wrongpassword and capture the resulting error message" \
+        --target "https://the-internet.herokuapp.com/login" \
+        --headed
+
+Note: the goal string was deliberately NOT augmented with a phrase like
+"...as a named business outcome". The point of the probe was to see whether
+the SYSTEM_PROMPT's own outcome_mapping instruction (agent/discovery_agent.py,
+"Most find_row/click/type/extract calls don't need this, but if an action
+could plausibly fail for a distinguishable business reason ... declare
+outcome_mapping") is enough on its own. Telling the model the answer in the
+goal would not have tested anything.
+
+--------------------------------------------------------------------------
+Console output (successful attempt):
+
+Starting discovery: goal='attempt to log in with username tomsmith and password wrongpassword and capture the resulting error message' target='https://the-internet.herokuapp.com/login' domains=['the-internet.herokuapp.com']
+Discovery succeeded: Attempted login with username tomsmith and wrong password wrongpassword, and captured the resulting error message.
+Artifact written to artifacts\attempt_to_log_in_with_username_tomsmith_1787678625.json
+--------------------------------------------------------------------------
+
+Artifact copied to evidence/artifact_login_invalid_credentials.json
+(the filename names the SCENARIO that was discovered -- it is not a claim
+that an "invalid_credentials" outcome rule exists inside it; it does not).
+
+Page shape confirmed independently before the run, via Playwright + the
+project's own Perceiver, with no LLM involved:
+
+  - textbox "Username"
+  - textbox "Password"
+  - button " Login"                    <- LEADING SPACE in the accessible
+                                          name (an icon glyph, U+F090)
+  - after an invalid submit, the flash arrives as a bare top-level
+    text node: " Your password is invalid!"  (also leading space, wrapped
+    in #flash, with a sibling "x" dismiss link)
+
+Two incidental environment notes from that check:
+  - stdout must be forced to UTF-8 (PYTHONIOENCODING=utf-8) or the U+F090
+    glyph crashes cp1252 console encoding on Windows.
+  - the page's own instructional heading literally contains both the valid
+    username and the valid password, so they are visible to the model in
+    the accessibility tree regardless of the goal.
+
+==========================================================================
+POST-RUN VERIFICATION -- the three checks this run was meant to answer
+==========================================================================
+
+Check 1: error condition captured as an outcome_mapping rule with
+         outcome_name "invalid_credentials", NOT hardcoded into a
+         postcondition as a text check
+         ................................................... [FAIL]
+
+  All four steps carry "outcome_mapping": [] -- the model never called the
+  outcome_mapping field on any tool call. The string "invalid_credentials"
+  appears nowhere in the artifact.
+
+  What it produced instead: the error text hardcoded as a literal in THREE
+  places, as a `text_contains` with expected_value --
+
+    step 3 (extract) precondition:
+        {"kind": "text_contains",
+         "description": "Error message visible",
+         "expected_value": "Your password is invalid!"}
+
+    step 3 (extract) postcondition:
+        {"kind": "text_contains",
+         "description": "Error message extracted",
+         "expected_value": "Your password is invalid!"}
+
+    success_condition:
+        {"kind": "text_contains",
+         "description": "Error message is displayed on page",
+         "expected_value": "Your password is invalid!"}
+
+  So the run-specific business result is baked in as a required condition
+  for the flow to be considered to have worked at all -- which is exactly
+  the inversion this probe was looking for.
+
+Check 2: the password value "wrongpassword" generalized into a named
+         parameter, not hardcoded
+         ................................................... [PASS]
+
+    parameters[1] = {"name": "password", "type": "string",
+                     "description": "Password for login",
+                     "example_value": "wrongpassword"}
+    step 1 (type) input_text = "{{password}}"
+
+  The literal "wrongpassword" appears in the artifact only as the
+  parameter's example_value, never as a step input.
+
+Check 3: the username also generalized into a parameter
+         ................................................... [PASS]
+
+    parameters[0] = {"name": "username", "type": "string",
+                     "description": "Username for login",
+                     "example_value": "tomsmith"}
+    step 0 (type) input_text = "{{username}}"
+
+==========================================================================
+TWO FURTHER DEFECTS FOUND WHILE VERIFYING (not part of the original probe)
+==========================================================================
+
+Defect A -- the extract step's conditions have no locator, so the artifact
+does not replay even on its own discovery path.
+
+  Both step-3 conditions are `text_contains` carrying only an
+  `expected_value` and no `role`/`name`, so ArtifactWriter had nothing to
+  build a Locator from (agent/artifact_writer.py::_condition_from_dict only
+  synthesizes a locator from `column_header` or `role`). Replaying with the
+  SAME wrong password therefore fails:
+
+      "status": "hard_failure", "step": 3,
+      "observed": "no locator on condition",
+      "error": "condition missing locator"
+
+  This is an `error`, not a clean False, so it is a hard_failure by design
+  regardless of outcome_mapping -- an outcome rule would not have rescued
+  it. It is the same defect class as the previously documented
+  evidence/artifact_malformed_precondition_example.json (a structurally
+  meaningless condition that ArtifactWriter accepts because its job is
+  "mechanical substitution and shaping ... not inference").
+
+Defect B -- the `value_extracted` generalization did not fire.
+
+  agent/artifact_writer.py rewrites a text_equals/text_contains whose
+  literal exactly matches one of this run's extracted outputs into a
+  `value_extracted` check, precisely so a run-specific result is not baked
+  in. That rewrite did NOT happen here: the three conditions above are
+  still literal text_contains. The mechanism keys off
+  `run.outputs` (the model's self-reported outputs map at finish time,
+  which is optional in FINISH_TOOL's schema and not required), so the
+  string it compared against did not match "Your password is invalid!"
+  exactly. Worth noting for the report: that safety net is only as good as
+  a field the model is not obliged to fill in.
+
+Also cosmetic, on steps 0 and 1: the postconditions are described as
+"Username textbox contains tomsmith" / "Password textbox contains password"
+but their `kind` is `element_visible`, so replay only ever checks that the
+box is visible -- the description promises more than the condition checks.
+
+==========================================================================
+ATTEMPTS AND QUOTA -- why there is only one discovery run here
+==========================================================================
+
+  attempt 1: 503 UNAVAILABLE ("model is currently experiencing high
+             demand") before any browser action -- transient, retried.
+  attempt 2: SUCCEEDED. This is the run documented above and the artifact
+             saved to evidence/.
+  attempt 3: 503 UNAVAILABLE.
+  attempt 4: 429 RESOURCE_EXHAUSTED.
+  attempt 5: 429 RESOURCE_EXHAUSTED.
+
+  Quota: generativelanguage.googleapis.com/generate_content_free_tier_requests
+  limit 20, GenerateRequestsPerDayPerProjectPerModel-FreeTier, model
+  gemini-3.6-flash. The free tier allows 20 requests per DAY per model, and
+  a single discovery run of this flow spends roughly five of them.
+
+  Consequence for the report: the [FAIL] on Check 1 is ONE observation, not
+  a measured rate. LLM tool-call output is nondeterministic between runs
+  (the existing evidence/discovery_log_frank_bach.txt documents exactly
+  that: a first attempt at that goal produced a malformed precondition and
+  a second attempt at the identical goal did not). Repeat attempts to see
+  whether outcome_mapping is ever proposed for this flow were blocked by
+  the daily quota, not skipped by choice.
+
+See evidence/replay_log_login_flow_success.txt for what this artifact does
+when replayed with the VALID password.
