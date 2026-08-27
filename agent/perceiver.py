@@ -78,10 +78,45 @@ class Perceiver:
         This is how "the Due cell in this row" is expressed without ever
         hardcoding a column position: the index is recomputed from the
         current header row every time, so it survives column reordering.
+
+        Some legacy tables mark their header row with plain <td> (styled to
+        look like a header via CSS) instead of <th>, so no element in them
+        carries the columnheader role at all. When that role is entirely
+        absent, fall back to the table's first row's cells -- still matched
+        by text, never by position -- rather than failing to find headers
+        on a table that simply doesn't mark them up semantically.
         """
         headers = self.root.get_by_role("columnheader")
         count = headers.count()
+        if count == 0:
+            headers = self.root.get_by_role("row").first.get_by_role("cell")
+            count = headers.count()
         for i in range(count):
             if headers.nth(i).inner_text().strip() == column_header:
                 return i
         raise ValueError(f"No column header matching {column_header!r}")
+
+    def resolve_input_by_label(self, label_text: str, role: Optional[str] = None) -> Locator:
+        """Locate an input that has no accessible name, by its adjacent label text.
+
+        Legacy table-layout forms put a field's caption as plain text in a <td>
+        next to the input, with no <label for> or aria-label tying them together
+        -- so the input never gets an accessible name and get_by_role(role,
+        name=...) can never match it. Mirrors the columnheader-by-text fallback
+        in resolve_column_index: locate the input by proximity to matching label
+        text in the DOM, never by position on the page. Tries the enclosing
+        table row first (label cell and input cell share a <tr>), then falls
+        back to the nearest input following the label text in document order
+        for non-table layouts.
+        """
+        input_selector = "input, textarea, select"
+        row = self.root.get_by_role("row").filter(has_text=label_text)
+        if row.count() == 1:
+            candidate = row.get_by_role(role) if role else row.locator(input_selector)
+            if candidate.count() == 1:
+                return candidate
+
+        label_node = self.root.get_by_text(label_text, exact=False).first
+        return label_node.locator(
+            "xpath=following::*[self::input or self::textarea or self::select][1]"
+        )

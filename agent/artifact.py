@@ -36,6 +36,9 @@ class LocatorKind(str, Enum):
     ROLE = "role"                        # accessible role + accessible name (primary signal)
     TABLE_CELL_BY_COLUMN = "table_cell_by_column"  # cell within a scoped row, found via column header text
     CSS = "css"                          # DOM selector fallback for elements with no accessible name
+    LABEL_PROXIMITY = "label_proximity"  # input with no accessible name, found via adjacent label text
+    # ROLE fields do double duty here: `role` is the target's role, `name` is the label
+    # text to match by proximity (not an accessible name -- there isn't one).
 
 
 class NameMatch(str, Enum):
@@ -57,6 +60,15 @@ class Locator(BaseModel):
     name: Optional[str] = None
     name_match: NameMatch = NameMatch.EXACT
     column_header: Optional[str] = None
+    column_index: Optional[int] = Field(
+        default=None,
+        description=(
+            "0-based cell position within the row scoped by the most recent find_row. "
+            "Only safe because the row itself was already located by content, never by "
+            "position -- use only when there's no reliable column header text to match by "
+            "name instead (e.g. a legacy table with no <th>/header row at all)."
+        ),
+    )
     css_selector: Optional[str] = None
     scope: str = Field(default="page", description="'page' or 'row' (most recent find_row)")
 

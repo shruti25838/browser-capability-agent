@@ -1,0 +1,619 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "goal": "Sign on to Meridian Core as operator teller1 with password 'password', use Member Inquiry to search by Member Number for 100234, select that member, then on their Shares/Balances page find the share row with Share ID 100234-S0001 and read its Type, Balance, and Status.",
+    "target_url": "https://web-sample.interface-hiring.com",
+    "created_at": "2026-08-27T04:17:10.267857Z"
+  },
+  "scope_selector": null,
+  "parameters": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "description": "Operator ID for sign-on",
+      "example_value": "teller1"
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "Operator password for sign-on",
+      "example_value": "password"
+    },
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "Member number to search",
+      "example_value": "100234"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "balance",
+      "type": "string",
+      "description": "Extract balance from {'kind': 'role', 'role': 'cell', 'name': '$1,500.00', 'name_match': 'exact', 'scope': 'page'}"
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "description": "Extract type from {'kind': 'role', 'role': 'row', 'name': '100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]', 'name_match': 'exact', 'scope': 'page'}"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "description": "Extract status from {'kind': 'role', 'role': 'row', 'name': '100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]', 'name_match': 'exact', 'scope': 'page'}"
+    }
+  ],
+  "steps": [
+    {
+      "order": 0,
+      "type": "type",
+      "description": "Type into textbox 'Operator ID:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Operator ID input is visible",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Operator ID:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_contains",
+        "description": "Operator ID input contains teller1",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Operator ID:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{operator_id}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Operator ID:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{operator_id}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 1,
+      "type": "type",
+      "description": "Type into textbox 'Password:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Password input is visible",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Password:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_contains",
+        "description": "Password input contains password",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Password:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{password}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Password:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{password}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 2,
+      "type": "click",
+      "description": "Click button 'Sign On'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "User navigates away from signon or reaches main page",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "MAIN MENU",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Sign On",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 3,
+      "type": "click",
+      "description": "Click link 'Member Inquiry'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Member Inquiry link visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Member Inquiry",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to Member Inquiry page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Member Inquiry",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 4,
+      "type": "type",
+      "description": "Type into textbox 'Value:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Value input is visible",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Value:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_contains",
+        "description": "Value textbox contains 100234",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Value:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{member_number}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Value:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{member_number}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 5,
+      "type": "click",
+      "description": "Click button 'Search'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_contains",
+        "description": "Search results or member list displayed containing 100234",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "MEMBER INQUIRY / SELECTION",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{member_number}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Search",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 6,
+      "type": "click",
+      "description": "Click link 'Select'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Select link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Select",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to member details page for 100234",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Select",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 7,
+      "type": "extract",
+      "description": "Extract balance from {'kind': 'role', 'role': 'cell', 'name': '$1,500.00', 'name_match': 'exact', 'scope': 'page'}",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Cell $1,500.00 is visible",
+        "locator": {
+          "kind": "role",
+          "role": "cell",
+          "name": "$1,500.00",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Cell $1,500.00 is extracted",
+        "locator": {
+          "kind": "role",
+          "role": "cell",
+          "name": "$1,500.00",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "cell",
+        "name": "$1,500.00",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": "balance",
+      "outcome_mapping": []
+    },
+    {
+      "order": 8,
+      "type": "extract",
+      "description": "Extract type from {'kind': 'role', 'role': 'row', 'name': '100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]', 'name_match': 'exact', 'scope': 'page'}",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Row 100234-S0001 is visible",
+        "locator": {
+          "kind": "role",
+          "role": "row",
+          "name": "100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Row 100234-S0001 is visible",
+        "locator": {
+          "kind": "role",
+          "role": "row",
+          "name": "100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "row",
+        "name": "100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": "type",
+      "outcome_mapping": []
+    },
+    {
+      "order": 9,
+      "type": "extract",
+      "description": "Extract status from {'kind': 'role', 'role': 'row', 'name': '100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]', 'name_match': 'exact', 'scope': 'page'}",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Row 100234-S0001 is visible",
+        "locator": {
+          "kind": "role",
+          "role": "row",
+          "name": "100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Row 100234-S0001 is visible",
+        "locator": {
+          "kind": "role",
+          "role": "row",
+          "name": "100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "row",
+        "name": "100234-S0001 Regular Shares $1,500.00 HOLD [HOLD]",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": "status",
+      "outcome_mapping": []
+    }
+  ],
+  "success_condition": {
+    "kind": "element_visible",
+    "description": "Member Record page is displayed with Shares/Balances table",
+    "locator": {
+      "kind": "role",
+      "role": "heading",
+      "name": "MEMBER RECORD",
+      "name_match": "exact",
+      "column_header": null,
+      "column_index": null,
+      "css_selector": null,
+      "scope": "page"
+    },
+    "contains_text": null,
+    "expected_value": null,
+    "url_pattern": null,
+    "output_field": null,
+    "expected_type": null
+  }
+}

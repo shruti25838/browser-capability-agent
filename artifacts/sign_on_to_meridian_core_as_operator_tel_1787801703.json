@@ -1,0 +1,602 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "goal": "Sign on to Meridian Core as operator teller1 with password 'password', use Member Inquiry to search by Member Number for 100234, select that member. On the Shares/Balances page, locate the share row by its Share ID 100234-S0001 only, then extract Type, Balance, and Status as three separate values by their column position within that row. Do not identify any cell or row by a balance, type, or status value, those are the values to read, not identifiers.",
+    "target_url": "https://web-sample.interface-hiring.com",
+    "created_at": "2026-08-27T03:35:03.690414Z"
+  },
+  "scope_selector": null,
+  "parameters": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "description": "Operator ID for sign on",
+      "example_value": "teller1"
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "Password for operator sign on",
+      "example_value": "password"
+    },
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "Member number to search for",
+      "example_value": "100234"
+    },
+    {
+      "name": "share_id",
+      "type": "string",
+      "description": "Share ID to inspect",
+      "example_value": "100234-S0001"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "share_id",
+      "type": "string",
+      "description": "Extract share_id from {'kind': 'role', 'role': 'cell', 'name': '100234-S0001', 'name_match': 'exact', 'scope': 'page'}"
+    },
+    {
+      "name": "share_type",
+      "type": "string",
+      "description": "Extract share_type from {'kind': 'table_cell_by_column', 'column_index': 1, 'scope': 'page'}"
+    }
+  ],
+  "steps": [
+    {
+      "order": 0,
+      "type": "type",
+      "description": "Type into textbox 'Operator ID:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On page is visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "OPERATOR SIGN ON",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_equals",
+        "description": "Operator ID field contains teller1",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Operator ID:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{operator_id}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Operator ID:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{operator_id}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 1,
+      "type": "type",
+      "description": "Type into textbox 'Password:'",
+      "precondition": {
+        "kind": "text_equals",
+        "description": "Operator ID field contains teller1",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Operator ID:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{operator_id}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Password field is filled",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Password:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Password:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{password}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 2,
+      "type": "click",
+      "description": "Click button 'Sign On'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_not_visible",
+        "description": "Signed in operator header is visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "OPERATOR SIGN ON",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Sign On",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 3,
+      "type": "click",
+      "description": "Click link 'Member Inquiry'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Member Inquiry link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Member Inquiry",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Member Inquiry page is displayed",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Member Inquiry",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 4,
+      "type": "type",
+      "description": "Type into textbox 'Value:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Member Inquiry page is visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "MEMBER INQUIRY / SELECTION",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_equals",
+        "description": "Value field contains 100234",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Value:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{member_number}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Value:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{member_number}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 5,
+      "type": "click",
+      "description": "Click button 'Search'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Search results or member section is displayed",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "{{member_number}}",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Search",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 6,
+      "type": "click",
+      "description": "Click link 'Select'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Select link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Select",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Member details/shares page is loaded",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Select",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 7,
+      "type": "extract",
+      "description": "Extract share_id from {'kind': 'role', 'role': 'cell', 'name': '100234-S0001', 'name_match': 'exact', 'scope': 'page'}",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Shares table is visible",
+        "locator": {
+          "kind": "role",
+          "role": "cell",
+          "name": "Share ID",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Share ID extracted",
+        "locator": {
+          "kind": "role",
+          "role": "cell",
+          "name": "{{share_id}}",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "cell",
+        "name": "{{share_id}}",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": "share_id",
+      "outcome_mapping": []
+    },
+    {
+      "order": 8,
+      "type": "extract",
+      "description": "Extract share_type from {'kind': 'table_cell_by_column', 'column_index': 1, 'scope': 'page'}",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Shares table is visible",
+        "locator": {
+          "kind": "role",
+          "role": "cell",
+          "name": "Share ID",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "share_type extracted",
+        "locator": {
+          "kind": "role",
+          "role": "cell",
+          "name": "Type",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "table_cell_by_column",
+        "role": null,
+        "name": null,
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": 1,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": "share_type",
+      "outcome_mapping": []
+    },
+    {
+      "order": 9,
+      "type": "find_row",
+      "description": "Find the row containing 'Cornerstone Financial Systems'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Top banner is visible",
+        "locator": {
+          "kind": "role",
+          "role": "cell",
+          "name": "MERIDIAN CORE Member Services Platform v4.2.1 Cornerstone Financial Systems™",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "row_visible",
+        "description": "Top row found",
+        "locator": null,
+        "contains_text": "Cornerstone Financial Systems",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": null,
+      "contains_text": "Cornerstone Financial Systems",
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    }
+  ],
+  "success_condition": {
+    "kind": "element_visible",
+    "description": "Share row 100234-S0001 is visible on the Shares/Balances page",
+    "locator": {
+      "kind": "role",
+      "role": "cell",
+      "name": "{{share_id}}",
+      "name_match": "exact",
+      "column_header": null,
+      "column_index": null,
+      "css_selector": null,
+      "scope": "page"
+    },
+    "contains_text": null,
+    "expected_value": null,
+    "url_pattern": null,
+    "output_field": null,
+    "expected_type": null
+  }
+}

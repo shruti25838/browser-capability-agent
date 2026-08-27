@@ -304,6 +304,111 @@ def test_unrelated_output_value_on_a_non_extract_step_does_not_cause_generalizat
     assert artifact.steps[0].postcondition.kind == ConditionKind.ROW_VISIBLE
 
 
+# -- column_index: row-scoped cell-by-position extraction --------------------
+
+
+def test_extract_step_with_column_index_locator_builds_correctly():
+    # Regression for the MERIDIAN balance bug: a cell must never be located by the
+    # literal value being read (e.g. "$1,500.00") -- only by position within a row
+    # already found by content (share_id), when there's no reliable header text.
+    extract_step = ExecutedStep(
+        order=1,
+        type="extract",
+        description="Extract balance",
+        precondition=_row_visible(contains_text="100234-S0001"),
+        postcondition={
+            "kind": "value_extracted",
+            "description": "balance was extracted as a non-empty string value",
+            "output_field": "balance",
+            "expected_type": "string",
+        },
+        locator={"kind": "table_cell_by_column", "column_index": 2, "scope": "row"},
+        output_field="balance",
+        output_type="string",
+    )
+    run = DiscoveryRun(
+        goal="find the share row and read its balance",
+        target_url="https://web-sample.interface-hiring.com",
+        success=True,
+        reason="done",
+        steps=[
+            ExecutedStep(
+                order=0,
+                type="find_row",
+                description="Find the row containing '100234-S0001'",
+                precondition=_row_visible(contains_text="100234-S0001"),
+                postcondition=_row_visible(contains_text="100234-S0001"),
+                contains_text="100234-S0001",
+            ),
+            extract_step,
+        ],
+        outputs={"balance": "$1,500.00"},
+        parameter_candidates=[
+            ParameterCandidate(name="share_id", value="100234-S0001", type="string", description="Share to select")
+        ],
+        success_condition={
+            "kind": "value_extracted",
+            "description": "balance extracted",
+            "output_field": "balance",
+        },
+    )
+
+    artifact = ArtifactWriter().build(run)
+
+    locator = artifact.steps[1].locator
+    assert locator.kind.value == "table_cell_by_column"
+    assert locator.column_index == 2
+    assert locator.column_header is None
+    assert locator.scope == "row"
+    # The literal balance value must never end up in the locator that finds it.
+    assert locator.name is None
+
+
+def test_condition_with_column_index_builds_row_scoped_locator():
+    # _condition_from_dict must handle column_index the same way it already handles
+    # column_header -- both describe "a cell in the row scoped by the last find_row".
+    click_step = ExecutedStep(
+        order=1,
+        type="click",
+        description="click confirm",
+        precondition={
+            "kind": "text_equals",
+            "description": "Status cell (4th column) reads HOLD",
+            "column_index": 3,
+            "expected_value": "HOLD",
+        },
+        postcondition=_row_visible(contains_text="100234-S0001"),
+    )
+    run = DiscoveryRun(
+        goal="test",
+        target_url="https://web-sample.interface-hiring.com",
+        success=True,
+        reason="done",
+        steps=[
+            ExecutedStep(
+                order=0,
+                type="find_row",
+                description="Find the row containing '100234-S0001'",
+                precondition=_row_visible(contains_text="100234-S0001"),
+                postcondition=_row_visible(contains_text="100234-S0001"),
+                contains_text="100234-S0001",
+            ),
+            click_step,
+        ],
+        outputs={},
+        parameter_candidates=[],
+        success_condition=_row_visible(contains_text="100234-S0001"),
+    )
+
+    artifact = ArtifactWriter().build(run)
+
+    precondition = artifact.steps[1].precondition
+    assert precondition.locator is not None
+    assert precondition.locator.kind.value == "table_cell_by_column"
+    assert precondition.locator.column_index == 3
+    assert precondition.locator.scope == "row"
+
+
 def test_step_with_no_outcome_mapping_in_discovery_run_gets_empty_list():
     run = DiscoveryRun(
         goal="test",

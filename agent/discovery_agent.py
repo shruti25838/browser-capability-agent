@@ -229,7 +229,14 @@ class DiscoveryAgent:
         self.goal = goal
         self.target_url = target_url
         self.guardrail = guardrail
-        self.client = client or genai.Client(api_key=self._require_api_key())
+        # Explicit, not relying on the SDK's current default: exactly one attempt per
+        # generate_content call, no silent retry-on-429/5xx. A rate limit must surface to
+        # us immediately as a clear error, never be retried away (which would also risk
+        # quietly burning through a tight free-tier quota one logical call at a time).
+        self.client = client or genai.Client(
+            api_key=self._require_api_key(),
+            http_options=types.HttpOptions(retry_options=types.HttpRetryOptions(attempts=1)),
+        )
         self.model = model
         self.max_turns = max_turns
         self.max_seconds = max_seconds
@@ -319,7 +326,7 @@ class DiscoveryAgent:
         config = types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
             tools=GEMINI_TOOLS,
-            max_output_tokens=4096,
+            max_output_tokens=8192,
         )
 
         start_time = time.monotonic()
@@ -499,6 +506,11 @@ class DiscoveryAgent:
         name_match = tool_input.get("name_match", "exact")
         css_selector = tool_input.get("css_selector")
         column_header = tool_input.get("column_header")
+        column_index = tool_input.get("column_index")
+
+        if column_index is not None:
+            target = base.get_by_role("cell").nth(column_index)
+            return target, {"kind": "table_cell_by_column", "column_index": column_index, "scope": scope}
 
         if column_header:
             idx = perceiver.resolve_column_index(column_header)
@@ -507,6 +519,19 @@ class DiscoveryAgent:
 
         if role:
             target = base.get_by_role(role, name=name, exact=(name_match == "exact")) if name else base.get_by_role(role)
+            if name and role in ("textbox", "combobox") and target.count() == 0:
+                # Legacy table-layout forms (e.g. a 1999-era HTML login page) have no
+                # <label for> tying the "Operator ID:" text to its input, so the input
+                # never gets an accessible name and the lookup above always misses.
+                # Fall back to locating it by proximity to that label text instead.
+                fallback = perceiver.resolve_input_by_label(name, role)
+                if fallback.count() == 1:
+                    return fallback, {
+                        "kind": "label_proximity",
+                        "role": role,
+                        "name": name,
+                        "scope": scope,
+                    }
             return target, {
                 "kind": "role",
                 "role": role,

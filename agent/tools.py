@@ -29,6 +29,9 @@ CONDITION_SCHEMA = {
             "type": "string",
             "description": "Column header text, if this refers to a table cell located by column",
         },
+        "column_index": {
+            "type": "integer",
+        },
         "contains_text": {
             "type": "string",
             "description": "Text a row must (row_visible) or must no longer (row_absent) contain",
@@ -146,6 +149,9 @@ EXTRACT_TOOL = {
             "column_header": {
                 "type": "string",
                 "description": "Header text of the column to read, within the row scoped by the last find_row",
+            },
+            "column_index": {
+                "type": "integer",
             },
             "output_field": {"type": "string", "description": "snake_case name to store the extracted value under"},
             "output_type": {"type": "string", "enum": ["string", "number", "boolean"], "default": "string"},

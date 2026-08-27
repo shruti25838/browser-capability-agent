@@ -155,6 +155,61 @@ def test_text_equals_condition_round_trips():
     assert reloaded.locator.scope == "row"
 
 
+def test_label_proximity_locator_round_trips():
+    locator = Locator(kind=LocatorKind.LABEL_PROXIMITY, role="textbox", name="Operator ID:", scope="page")
+
+    reloaded = Locator.model_validate_json(locator.model_dump_json())
+
+    assert reloaded == locator
+    assert reloaded.kind == LocatorKind.LABEL_PROXIMITY
+    assert reloaded.role == "textbox"
+    assert reloaded.name == "Operator ID:"
+
+
+def test_step_with_label_proximity_locator_round_trips_through_full_artifact(tmp_path):
+    condition = Condition(kind=ConditionKind.ELEMENT_VISIBLE, description="operator id input visible")
+    step = Step(
+        order=0,
+        type=StepType.TYPE,
+        description="Type into textbox 'Operator ID:'",
+        precondition=condition,
+        postcondition=condition,
+        locator=Locator(kind=LocatorKind.LABEL_PROXIMITY, role="textbox", name="Operator ID:", scope="page"),
+        input_text="{{operator_id}}",
+    )
+    artifact = Artifact(
+        metadata=Metadata(
+            goal="log in",
+            target_url="https://example.com/login",
+            created_at=datetime(2026, 8, 26, 12, 0, 0, tzinfo=timezone.utc),
+        ),
+        parameters=[Parameter(name="operator_id", type="string", description="Operator ID", example_value="OP1")],
+        outputs=[],
+        steps=[step],
+        success_condition=condition,
+    )
+    path = tmp_path / "artifact.json"
+
+    artifact.to_json_file(str(path))
+    reloaded = Artifact.from_json_file(str(path))
+
+    assert reloaded == artifact
+    assert reloaded.steps[0].locator.kind == LocatorKind.LABEL_PROXIMITY
+    assert reloaded.steps[0].locator.name == "Operator ID:"
+
+
+def test_table_cell_by_column_index_locator_round_trips():
+    locator = Locator(kind=LocatorKind.TABLE_CELL_BY_COLUMN, column_index=2, scope="row")
+
+    reloaded = Locator.model_validate_json(locator.model_dump_json())
+
+    assert reloaded == locator
+    assert reloaded.kind == LocatorKind.TABLE_CELL_BY_COLUMN
+    assert reloaded.column_index == 2
+    assert reloaded.column_header is None
+    assert reloaded.scope == "row"
+
+
 def test_outcome_mapping_round_trips_and_defaults_to_empty():
     rule = OutcomeRule(
         outcome_name="permission_denied",

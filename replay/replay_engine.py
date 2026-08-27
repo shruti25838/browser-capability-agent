@@ -322,7 +322,11 @@ class ReplayEngine:
         if locator is None:
             raise ValueError("step has no locator to act on")
         if locator.kind == LocatorKind.TABLE_CELL_BY_COLUMN:
-            idx = self.perceiver.resolve_column_index(locator.column_header)
+            idx = (
+                locator.column_index
+                if locator.column_index is not None
+                else self.perceiver.resolve_column_index(locator.column_header)
+            )
             return base.get_by_role("cell").nth(idx)
         if locator.kind == LocatorKind.ROLE:
             if locator.name:
@@ -330,6 +334,8 @@ class ReplayEngine:
             return base.get_by_role(locator.role)
         if locator.kind == LocatorKind.CSS:
             return base.locator(locator.css_selector)
+        if locator.kind == LocatorKind.LABEL_PROXIMITY:
+            return self.perceiver.resolve_input_by_label(locator.name, locator.role)
         raise ValueError(f"Unsupported locator kind {locator.kind!r}")
 
     # -- condition checking -------------------------------------------------
