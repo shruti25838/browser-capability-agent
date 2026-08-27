@@ -1,0 +1,801 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "goal": "Sign on to Meridian Core as operator teller1 with password 'password', use Member Inquiry to search by Member Number for 100234, select that member, then click Funds Transfer. On the transfer form, select From Share 100234-MMKT-10 and To Share 100234-S0001-6 (two different OPEN shares), enter an amount of 10 in the Amount field, and click Continue to reach the transfer review screen.",
+    "target_url": "https://web-sample.interface-hiring.com",
+    "created_at": "2026-08-27T13:54:45.149575Z"
+  },
+  "scope_selector": null,
+  "parameters": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "description": "Operator ID for sign on",
+      "example_value": "teller1"
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "Password for sign on",
+      "example_value": "password"
+    },
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "Member number to search for",
+      "example_value": "100234"
+    },
+    {
+      "name": "amount",
+      "type": "string",
+      "description": "Amount to transfer",
+      "example_value": "10"
+    }
+  ],
+  "outputs": [],
+  "steps": [
+    {
+      "order": 0,
+      "type": "type",
+      "description": "Type into textbox 'Operator ID'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Operator ID",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{operator_id}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 1,
+      "type": "type",
+      "description": "Type into textbox 'Password'",
+      "precondition": {
+        "kind": "text_equals",
+        "description": "Operator ID is teller1",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Operator ID",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{operator_id}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Password",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{password}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 2,
+      "type": "click",
+      "description": "Click button 'Sign On'",
+      "precondition": {
+        "kind": "text_equals",
+        "description": "Password field is filled",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Password",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{password}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_not_visible",
+        "description": "Operator Sign On heading is no longer visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "OPERATOR SIGN ON",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Sign On",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 3,
+      "type": "click",
+      "description": "Click link 'Member Inquiry / Selection'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Main Menu heading is visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "MAIN MENU",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to members page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Member Inquiry / Selection",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 4,
+      "type": "type",
+      "description": "Type into textbox 'Value'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_equals",
+        "description": "Value field contains 100234",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Value",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{member_number}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Value",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{member_number}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 5,
+      "type": "click",
+      "description": "Click button 'Search'",
+      "precondition": {
+        "kind": "text_equals",
+        "description": "Value textbox is set to 100234",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Value",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{member_number}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Search results contain member 100234",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Search",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 6,
+      "type": "click",
+      "description": "Click link 'Select'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Select link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Select",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to member 100234 details",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Select",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 7,
+      "type": "click",
+      "description": "Click link 'Funds Transfer'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Member Record heading is visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "MEMBER RECORD",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to transfer form",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234/transfer",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Funds Transfer",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 8,
+      "type": "click",
+      "description": "Click combobox 'From Share'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Funds Transfer heading is visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "FUNDS TRANSFER",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "From Share combobox is visible",
+        "locator": {
+          "kind": "role",
+          "role": "combobox",
+          "name": "From Share",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "combobox",
+        "name": "From Share",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 9,
+      "type": "type",
+      "description": "Type into textbox 'Amount'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Continue button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Continue",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_equals",
+        "description": "Amount field contains 10",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Amount",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{amount}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Amount",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{amount}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 10,
+      "type": "click",
+      "description": "Click button 'Continue'",
+      "precondition": {
+        "kind": "text_equals",
+        "description": "Amount field is set to 10",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Amount",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{amount}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Transfer review screen or validation message is shown",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "FUNDS TRANSFER",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 11,
+      "type": "click",
+      "description": "Click link 'Return to Funds Transfer'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Return to Funds Transfer link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Return to Funds Transfer",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Returned to funds transfer page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234/transfer",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Return to Funds Transfer",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 12,
+      "type": "type",
+      "description": "Type into textbox 'Amount'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Continue button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Continue",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "text_equals",
+        "description": "Amount field contains 10",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Amount",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{amount}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Amount",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{amount}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 13,
+      "type": "click",
+      "description": "Click button 'Continue'",
+      "precondition": {
+        "kind": "text_equals",
+        "description": "Amount field is filled with 10",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Amount",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": "{{amount}}",
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Reached transfer review page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/transfer/review",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    }
+  ],
+  "success_condition": {
+    "kind": "url_contains",
+    "description": "Reached the transfer review screen",
+    "locator": null,
+    "contains_text": null,
+    "expected_value": null,
+    "url_pattern": "/transfer/review",
+    "output_field": null,
+    "expected_type": null
+  }
+}

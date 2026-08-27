@@ -272,7 +272,6 @@ def create_app(evidence_dir: str) -> Flask:
       :root {{
         color-scheme: light;
 
-        /* Neutrals -- cool slate, deliberately not warm/beige. */
         --page-bg: #f1f3f8;
         --surface: #ffffff;
         --surface-sunken: #f8f9fb;
@@ -283,14 +282,12 @@ def create_app(evidence_dir: str) -> Flask:
         --border-strong: rgba(15, 23, 42, 0.12);
         --divider: #e7e9f0;
 
-        /* Primary accent family -- deep teal through cyan, used with confidence. */
         --accent: #0f766e;
         --accent-2: #0d9488;
         --accent-tint: rgba(13, 148, 136, 0.08);
         --accent-border: rgba(13, 148, 136, 0.20);
         --accent-gradient: linear-gradient(135deg, #0f766e 0%, #0d9488 45%, #22d3ee 100%);
 
-        /* Status -- reserved meanings, not decoration. */
         --warning: #f5a524;
         --warning-ink: #92400e;
         --warning-tint: rgba(245, 165, 36, 0.16);
@@ -326,10 +323,6 @@ def create_app(evidence_dir: str) -> Flask:
       .topbar {{ height: 5px; width: 100%; background: var(--accent-gradient); }}
       .page {{ max-width: 1320px; margin: 0 auto; padding: 18px 28px 22px; }}
 
-      /* Two-column layout: left is the read-and-decide column (context, diff, hint,
-         actions); right is the screenshot, sized to match the left column's height so
-         it reads as the page's visual anchor instead of a tall stack under everything
-         else. Falls back to a single stacked column only on genuinely narrow screens. */
       .dashboard-grid {{ display: grid; grid-template-columns: 5fr 7fr; gap: 18px; align-items: stretch; }}
       .col-left {{ display: flex; flex-direction: column; gap: 14px; min-width: 0; }}
       .col-right {{ display: flex; flex-direction: column; min-width: 0; }}
@@ -399,8 +392,6 @@ def create_app(evidence_dir: str) -> Flask:
       .empty-state {{ text-align: center; padding: 32px 8px; color: var(--text-secondary); font-size: 14.5px; }}
       .empty-icon {{ margin: 0 auto 16px; }}
 
-      /* The goal is usually the longest field -- give it the card's full width instead
-         of squeezing it into a narrow value column, so it wraps to fewer lines. */
       .context-primary {{ margin-bottom: 13px; padding-bottom: 13px; border-bottom: 1px solid var(--divider); }}
       .context-label {{ color: var(--text-muted); font-size: 12.5px; font-weight: 550; margin-bottom: 4px; }}
       .context-value {{ font-size: 14.5px; line-height: 1.45; color: var(--text-primary); font-weight: 500; }}
@@ -433,8 +424,6 @@ def create_app(evidence_dir: str) -> Flask:
         box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
         display: flex; align-items: center; justify-content: center;
       }}
-      /* object-fit: contain -- a screenshot is evidence, so the frame is sized to fit
-         the available column height without ever cropping any of the captured page. */
       .screenshot-frame img {{ display: block; width: 100%; height: 100%; object-fit: contain; }}
 
       .actions {{ display: flex; gap: 14px; }}
