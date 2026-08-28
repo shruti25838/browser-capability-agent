@@ -1,0 +1,471 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "goal": "Sign on to Meridian Core as operator teller1 with password 'password', use Member Inquiry to search by Member Number for 100234, select that member, then click Place Account Hold.",
+    "target_url": "https://web-sample.interface-hiring.com",
+    "created_at": "2026-08-28T04:31:18.175271Z"
+  },
+  "scope_selector": null,
+  "parameters": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "description": "Operator ID for sign-on",
+      "example_value": "teller1"
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "Password for sign-on",
+      "example_value": "password"
+    },
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "Member number to search for",
+      "example_value": "100234"
+    }
+  ],
+  "outputs": [],
+  "steps": [
+    {
+      "order": 0,
+      "type": "type",
+      "description": "Type into textbox 'Operator ID:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Operator ID:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{operator_id}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 1,
+      "type": "type",
+      "description": "Type into textbox 'Password:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Password input field is visible",
+        "locator": {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Password:",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Password:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{password}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 2,
+      "type": "click",
+      "description": "Click button 'Sign On'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_not_visible",
+        "description": "Operator sign on heading is no longer visible",
+        "locator": {
+          "kind": "role",
+          "role": "heading",
+          "name": "OPERATOR SIGN ON",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Sign On",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 3,
+      "type": "click",
+      "description": "Click link 'Member Inquiry / Selection'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Member Inquiry link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Member Inquiry / Selection",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to member search page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Member Inquiry / Selection",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 4,
+      "type": "type",
+      "description": "Type into textbox 'Value:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Value:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{member_number}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 5,
+      "type": "click",
+      "description": "Click button 'Search'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Search",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 6,
+      "type": "click",
+      "description": "Click link 'Select'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Select link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Select",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to member detail page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Select",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 7,
+      "type": "click",
+      "description": "Click link 'Place Account Hold'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Place Account Hold link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Place Account Hold",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Navigated to place account hold page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234/hold",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Place Account Hold",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    }
+  ],
+  "success_condition": {
+    "kind": "url_contains",
+    "description": "Navigated to Place Account Hold page for member 100234",
+    "locator": null,
+    "contains_text": null,
+    "expected_value": null,
+    "url_pattern": "/members/100234/hold",
+    "output_field": null,
+    "expected_type": null
+  }
+}

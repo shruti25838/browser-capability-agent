@@ -1,0 +1,657 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "goal": "Sign on to Meridian Core as operator teller1 with password 'password', use Member Inquiry to search by Member Number for 100234, select that member, then click Open New Share and complete the form to open a new share.",
+    "target_url": "https://web-sample.interface-hiring.com",
+    "created_at": "2026-08-28T04:38:54.047413Z"
+  },
+  "scope_selector": null,
+  "parameters": [
+    {
+      "name": "operator_id",
+      "type": "string",
+      "description": "Operator ID for sign on",
+      "example_value": "teller1"
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "description": "Operator password",
+      "example_value": "password"
+    },
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "Member number to search",
+      "example_value": "100234"
+    },
+    {
+      "name": "initial_deposit",
+      "type": "string",
+      "description": "Initial deposit amount for new share",
+      "example_value": "100"
+    }
+  ],
+  "outputs": [],
+  "steps": [
+    {
+      "order": 0,
+      "type": "type",
+      "description": "Type into textbox 'Operator ID:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible on the page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible on the page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Operator ID:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{operator_id}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 1,
+      "type": "type",
+      "description": "Type into textbox 'Password:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible on the page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible on the page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Password:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{password}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 2,
+      "type": "click",
+      "description": "Click button 'Sign On'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Sign On button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_not_visible",
+        "description": "Sign On button is no longer visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Sign On",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Sign On",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 3,
+      "type": "click",
+      "description": "Click link 'Member Inquiry / Selection'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Member Inquiry / Selection link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Member Inquiry / Selection",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "URL contains /members",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Member Inquiry / Selection",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 4,
+      "type": "type",
+      "description": "Type into textbox 'Value:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible on page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible on page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Value:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{member_number}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 5,
+      "type": "click",
+      "description": "Click button 'Search'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible on page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Search button is visible on page",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Search",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Search",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 6,
+      "type": "click",
+      "description": "Click link 'Select'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Select link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Select",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "URL contains /members/100234",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Select",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 7,
+      "type": "click",
+      "description": "Click link 'Open New Share'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Open New Share link is visible",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Open New Share",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "URL contains /open-share",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/open-share",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Open New Share",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 8,
+      "type": "type",
+      "description": "Type into textbox 'Initial Deposit:'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Continue button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Continue",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Continue button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Continue",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Initial Deposit:",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": "{{initial_deposit}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 9,
+      "type": "click",
+      "description": "Click button 'Continue'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Continue button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Continue",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_visible",
+        "description": "Continue button is clicked",
+        "locator": {
+          "kind": "role",
+          "role": "link",
+          "name": "Main Menu",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Continue",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 10,
+      "type": "click",
+      "description": "Click button 'Open Share'",
+      "precondition": {
+        "kind": "element_visible",
+        "description": "Open Share button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Open Share",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "element_not_visible",
+        "description": "Open Share button is no longer visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Open Share",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Open Share",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "page"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    }
+  ],
+  "success_condition": {
+    "kind": "element_visible",
+    "description": "SHARE OPENED heading is visible on confirmation page",
+    "locator": {
+      "kind": "role",
+      "role": "heading",
+      "name": "SHARE OPENED",
+      "name_match": "exact",
+      "column_header": null,
+      "column_index": null,
+      "css_selector": null,
+      "scope": "page"
+    },
+    "contains_text": null,
+    "expected_value": null,
+    "url_pattern": null,
+    "output_field": null,
+    "expected_type": null
+  }
+}
