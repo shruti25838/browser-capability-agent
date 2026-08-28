@@ -113,3 +113,29 @@ def redact_mapping(data: dict[str, Any], protected_keys: frozenset[str] = frozen
         return value
 
     return {k: (v if k in protected_keys else _walk(v)) for k, v in data.items()}
+
+
+_SENSITIVE_KEY_RE = re.compile(r"(password|passwd|secret|token)", re.IGNORECASE)
+
+
+def redact_sensitive_keys(data: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of `data` with every value under a credential-shaped key
+    (password/passwd/secret/token, case-insensitive substring match -- covers
+    "password", "operator_password", "auth_token", "api_secret", etc.)
+    replaced with REDACTED, regardless of what the value looks like.
+
+    Complements redact_text's value-shape heuristics (SSN-like, credit-card-
+    like, long digit runs): a short alphabetic password like "password" or
+    "hunter2" matches none of those shapes, so it survives redact_mapping
+    untouched unless the field NAME itself is checked too. Recurses into
+    nested dicts/lists the same way redact_mapping does.
+    """
+
+    def _walk(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {k: (REDACTED if _SENSITIVE_KEY_RE.search(k) else _walk(v)) for k, v in value.items()}
+        if isinstance(value, list):
+            return [_walk(v) for v in value]
+        return value
+
+    return _walk(data)

@@ -4,7 +4,8 @@ One JSON line per run, written as a side effect of catalog/service.py's
 invoke path -- never a new source of truth. Every field here is read
 straight off the existing ReplayEngine.run() result contract (status,
 outcome_name, recovered_via_retry, steps[].retry_count) and the existing
-redaction rules (agent/redaction.redact_mapping), not reinvented.
+redaction rules (agent/redaction.redact_mapping and redact_sensitive_keys),
+not reinvented.
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ import os
 from datetime import datetime, timezone
 from typing import Any
 
-from agent.redaction import redact_mapping
+from agent.redaction import redact_mapping, redact_sensitive_keys
 
 DEFAULT_RUN_LOG_PATH = os.path.join("runs", "run_log.jsonl")
 
@@ -30,7 +31,7 @@ def build_run_record(capability: str, params: dict[str, Any], result: dict[str, 
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "capability": capability,
-        "params": redact_mapping(params),
+        "params": redact_mapping(redact_sensitive_keys(params)),
         "status": result.get("status"),
         "outcome_name": result.get("outcome_name"),
         "recovered_via_retry": bool(result.get("recovered_via_retry", False)),

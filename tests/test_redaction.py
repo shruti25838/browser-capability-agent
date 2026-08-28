@@ -7,6 +7,7 @@ from agent.redaction import (
     redact_credit_card_like,
     redact_long_digit_sequences,
     redact_mapping,
+    redact_sensitive_keys,
     redact_ssn_like,
     redact_text,
 )
@@ -155,3 +156,50 @@ def test_redact_mapping_recurses_into_nested_non_protected_dicts():
     redacted = redact_mapping(record)
 
     assert "123-45-6789" not in redacted["context"]["observed"]
+
+
+# -- redact_sensitive_keys: redact by field name, not value shape ------------
+
+
+def test_redact_sensitive_keys_redacts_a_plain_password_field():
+    # "password" the literal string matches none of redact_text's value-shape
+    # heuristics (not SSN-, credit-card-, or long-digit-shaped) -- this is exactly
+    # the gap that let a plaintext password reach the dashboard.
+    params = {"operator_id": "teller1", "password": "password", "member_number": "100234"}
+
+    redacted = redact_sensitive_keys(params)
+
+    assert redacted["password"] == REDACTED
+    assert redacted["operator_id"] == "teller1"
+    assert redacted["member_number"] == "100234"
+
+
+def test_redact_sensitive_keys_matches_password_like_and_secret_and_token_keys():
+    params = {"operator_password": "hunter2", "api_secret": "shh", "auth_token": "abc123", "username": "tomsmith"}
+
+    redacted = redact_sensitive_keys(params)
+
+    assert redacted["operator_password"] == REDACTED
+    assert redacted["api_secret"] == REDACTED
+    assert redacted["auth_token"] == REDACTED
+    assert redacted["username"] == "tomsmith"
+
+
+def test_redact_sensitive_keys_recurses_into_nested_dicts():
+    params = {"credentials": {"password": "hunter2"}, "member_number": "100234"}
+
+    redacted = redact_sensitive_keys(params)
+
+    assert redacted["credentials"]["password"] == REDACTED
+    assert redacted["member_number"] == "100234"
+
+
+def test_redact_sensitive_keys_composes_with_redact_mapping():
+    # This is exactly the call catalog/run_log.py makes: key-name redaction first,
+    # then the existing value-shape redaction on top -- both must take effect.
+    params = {"password": "password", "notes": "SSN 123-45-6789 on file"}
+
+    redacted = redact_mapping(redact_sensitive_keys(params))
+
+    assert redacted["password"] == REDACTED
+    assert "123-45-6789" not in redacted["notes"]

@@ -28,6 +28,7 @@ invoke error, and the response returned to the caller is unchanged.
 from __future__ import annotations
 
 import glob
+import multiprocessing
 import os
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
@@ -112,27 +113,89 @@ def _build_contract(name: str, artifact: Artifact) -> dict[str, Any]:
 # -- the replay/browser seam tests mock ---------------------------------------
 
 
-def _run_replay(artifact: Artifact, params: dict[str, Any]) -> dict[str, Any]:
-    """The real runner: launches Playwright and drives ReplayEngine, exactly
-    the way replay.py's CLI does -- same GuardrailChecker construction, same
-    DEFAULT_ALLOWED_ACTIONS, same artifact.scope_selector default. Nothing
-    in the request body can influence `allow_confirmed_actions`: it is
-    never read from `params`, so a capability tagged requires_confirmation
-    or blocked is refused here exactly as it would be replaying from the
-    CLI without --allow-confirmed-actions.
-    """
-    target_host = urlparse(artifact.metadata.target_url).hostname
-    guardrail = GuardrailChecker(allowed_domains=[target_host], allowed_actions=DEFAULT_ALLOWED_ACTIONS)
+REPLAY_SUBPROCESS_TIMEOUT_S = 180
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        try:
-            page.goto(artifact.metadata.target_url)
-            engine = ReplayEngine(page=page, guardrail=guardrail, root_selector=artifact.scope_selector)
-            return engine.run(artifact, params)
-        finally:
-            browser.close()
+
+def _run_replay_worker(artifact: Artifact, params: dict[str, Any], result_queue: "multiprocessing.Queue") -> None:
+    """Runs in a separate OS process (see _run_replay below) -- same
+    GuardrailChecker construction, same DEFAULT_ALLOWED_ACTIONS, same
+    artifact.scope_selector default as replay.py's CLI. Nothing in the
+    request body can influence `allow_confirmed_actions`: it is never read
+    from `params`, so a capability tagged requires_confirmation or blocked
+    is refused here exactly as it would be replaying from the CLI without
+    --allow-confirmed-actions.
+
+    Reports back over result_queue instead of returning/raising directly --
+    a raised exception doesn't reliably cross a process boundary, so any
+    failure here becomes a (False, message) tuple instead.
+    """
+    try:
+        target_host = urlparse(artifact.metadata.target_url).hostname
+        guardrail = GuardrailChecker(allowed_domains=[target_host], allowed_actions=DEFAULT_ALLOWED_ACTIONS)
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            try:
+                page.goto(artifact.metadata.target_url)
+                engine = ReplayEngine(page=page, guardrail=guardrail, root_selector=artifact.scope_selector)
+                result = engine.run(artifact, params)
+            finally:
+                browser.close()
+        result_queue.put((True, result))
+    except Exception as e:  # noqa: BLE001 -- must always report back, never leave the parent hanging
+        result_queue.put((False, f"{type(e).__name__}: {e}"))
+
+
+def _run_replay(artifact: Artifact, params: dict[str, Any]) -> dict[str, Any]:
+    """The real runner: drives ReplayEngine over a real Playwright browser.
+
+    Runs _run_replay_worker in a separate OS process (multiprocessing,
+    "spawn" -- the only start method Windows supports, and the safest
+    cross-platform choice) rather than calling sync Playwright directly in
+    this thread. FastAPI runs a sync endpoint like invoke_capability in a
+    worker thread of the *same process* that's running uvicorn's own asyncio
+    event loop, and Playwright's sync API refuses to operate in a process
+    that has any running event loop at all -- a fresh child process's main
+    thread has none, so this sidesteps that restriction entirely instead of
+    working around it in-process.
+    """
+    ctx = multiprocessing.get_context("spawn")
+    result_queue: multiprocessing.Queue = ctx.Queue()
+    process = ctx.Process(target=_run_replay_worker, args=(artifact, params, result_queue))
+    process.start()
+    process.join(REPLAY_SUBPROCESS_TIMEOUT_S)
+
+    if process.is_alive():
+        process.terminate()
+        process.join()
+        return {
+            "status": "hard_failure",
+            "step": 0,
+            "expected": f"replay completes within {REPLAY_SUBPROCESS_TIMEOUT_S}s",
+            "observed": "replay subprocess was still running and was terminated",
+            "error": "replay subprocess timed out",
+        }
+
+    if result_queue.empty():
+        return {
+            "status": "hard_failure",
+            "step": 0,
+            "expected": "replay subprocess reports a result",
+            "observed": f"subprocess exited with code {process.exitcode} before reporting a result",
+            "error": "replay subprocess crashed before reporting a result",
+        }
+
+    ok, payload = result_queue.get()
+    if not ok:
+        return {
+            "status": "hard_failure",
+            "step": 0,
+            "expected": "replay completes without an unhandled exception",
+            "observed": "exception in replay subprocess",
+            "error": payload,
+        }
+    return payload
 
 
 ReplayRunner = Callable[[Artifact, dict[str, Any]], dict[str, Any]]

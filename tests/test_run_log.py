@@ -44,8 +44,24 @@ def test_build_run_record_redacts_params_but_not_structural_fields():
     record = build_run_record("cap", {"password": "wrongpassword", "ssn": "123-45-6789"}, result)
 
     assert record["params"]["ssn"] == "[REDACTED]"
-    # A non-sensitive-looking string param survives untouched.
-    assert record["params"]["password"] == "wrongpassword"
+    assert record["params"]["password"] == "[REDACTED]"
+
+
+def test_build_run_record_redacts_a_plaintext_password_field():
+    # Regression: "password" the literal string ("password", "teller1", etc.) matches
+    # none of redact_text's value-shape heuristics, so it must be caught by field name
+    # instead -- this is the exact bug reported from the live dashboard.
+    result = _result(status="hard_failure")
+
+    record = build_run_record(
+        "sign_on_to_meridian_core_as_operator_tel_1787804230",
+        {"member_number": "100234", "operator_id": "teller1", "password": "password"},
+        result,
+    )
+
+    assert record["params"]["password"] == "[REDACTED]"
+    assert record["params"]["operator_id"] == "teller1"
+    assert record["params"]["member_number"] == "100234"
 
 
 def test_build_run_record_picks_up_outcome_name_and_evidence():
