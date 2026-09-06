@@ -96,7 +96,7 @@ class FakePerceiver:
         self.root = root if root is not None else FakeLocator(count=0, visible=False)
         self.visible_text_result = visible_text_result
 
-    def find_row(self, contains_text: str):
+    def find_row(self, contains_text: str, exact: bool = False):
         self.find_row_calls += 1
         result = self.find_row_result(self.find_row_calls) if callable(self.find_row_result) else self.find_row_result
         if isinstance(result, Exception):
@@ -290,7 +290,7 @@ def test_check_with_retries_retries_until_condition_passes():
     engine = _make_engine()
     calls = {"n": 0}
 
-    def flaky(contains_text):
+    def flaky(contains_text, exact=False):
         calls["n"] += 1
         return FakeLocator(count=0) if calls["n"] < 3 else FakeLocator(count=1)
 

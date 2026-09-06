@@ -1,0 +1,1 @@
+{"timestamp": "2026-08-28T16:09:43.178521+00:00", "capability": "sign_on_to_meridian_core_as_operator_tel_1787891478", "params": {"operator_id": "teller1", "password": "[REDACTED]", "member_number": "100234", "share_id": "100234-S0001"}, "status": "hard_failure", "outcome_name": null, "recovered_via_retry": false, "retry_count": 2, "evidence": null}

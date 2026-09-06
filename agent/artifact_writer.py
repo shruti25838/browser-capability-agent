@@ -134,10 +134,18 @@ class ArtifactWriter:
         output_field_to_type: Optional[dict[str, str]] = None,
     ) -> Condition:
         locator = None
+        locator_hint = d.get("locator")
         if d.get("column_index") is not None:
             locator = Locator(kind=LocatorKind.TABLE_CELL_BY_COLUMN, column_index=d["column_index"], scope="row")
         elif d.get("column_header"):
             locator = Locator(kind=LocatorKind.TABLE_CELL_BY_COLUMN, column_header=d["column_header"], scope="row")
+        elif isinstance(locator_hint, dict) and locator_hint.get("kind") == "label_proximity":
+            # Legacy-unlabeled-field fix: a condition about a field with no accessible name
+            # (e.g. MERIDIAN's "Operator ID:" input) must build the same LABEL_PROXIMITY
+            # locator its step's action locator uses, not a ROLE locator -- a ROLE lookup by
+            # name resolves to zero elements for these fields and fails replay before the
+            # working action ever runs.
+            locator = Locator(kind=LocatorKind.LABEL_PROXIMITY, role=d.get("role"), name=sub(d.get("name")))
         elif d.get("role"):
             locator = Locator(kind=LocatorKind.ROLE, role=d.get("role"), name=sub(d.get("name")))
 

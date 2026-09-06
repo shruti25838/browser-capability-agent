@@ -71,6 +71,35 @@ def test_resolve_target_label_proximity_distinguishes_labels_in_same_form(engine
     assert password.get_attribute("id") == "f2"
 
 
+def test_resolve_target_role_locator_falls_back_to_label_proximity_when_unlabeled(engine):
+    # Regression for the MERIDIAN replay-at-login bug: some recorded artifacts have their
+    # precondition/postcondition locators saved as ROLE+name for a field that has no
+    # accessible name at all (only the step's own action locator was correctly saved as
+    # LABEL_PROXIMITY). A plain get_by_role(name=...) lookup for such a field resolves to
+    # zero elements -- confirm _resolve_target now falls back to label-proximity resolution
+    # instead of failing the precondition/postcondition before the working action ever runs.
+    locator = Locator(kind=LocatorKind.ROLE, role="textbox", name="Operator ID:")
+
+    # Sanity check this fixture actually exercises the gap: no accessible name means the
+    # underlying role+name lookup alone would find nothing.
+    assert engine.perceiver.root.get_by_role("textbox", name="Operator ID:").count() == 0
+
+    target = engine._resolve_target(locator, engine.perceiver.root)
+
+    assert target.count() == 1
+    assert target.get_attribute("id") == "f1"
+
+
+def test_resolve_target_role_locator_stays_empty_when_no_label_match(engine):
+    # If the fallback also finds nothing, the original empty role locator must be returned
+    # so the caller still sees count=0 and reports honestly, rather than raising.
+    locator = Locator(kind=LocatorKind.ROLE, role="textbox", name="Nonexistent Field:")
+
+    target = engine._resolve_target(locator, engine.perceiver.root)
+
+    assert target.count() == 0
+
+
 def test_perform_type_action_fills_label_proximity_target(engine, page):
     from agent.artifact import Condition, ConditionKind, Step, StepType
 

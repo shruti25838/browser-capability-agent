@@ -16,7 +16,7 @@ JSON-schema-to-Gemini-schema conversion at module load, no network calls.
 
 from __future__ import annotations
 
-from agent.artifact import ConditionKind
+from agent.artifact import ConditionKind, LocatorKind
 from agent.artifact_writer import ArtifactWriter
 from agent.discovery_agent import DiscoveryRun, ExecutedStep, ParameterCandidate
 
@@ -407,6 +407,51 @@ def test_condition_with_column_index_builds_row_scoped_locator():
     assert precondition.locator.kind.value == "table_cell_by_column"
     assert precondition.locator.column_index == 3
     assert precondition.locator.scope == "row"
+
+
+# -- label_proximity condition locators (MERIDIAN replay-at-login fix) ------
+
+
+def test_condition_with_label_proximity_hint_builds_label_proximity_locator():
+    # Regression for the MERIDIAN replay-at-login bug: a condition about a legacy unlabeled
+    # field (e.g. "Operator ID:") must build the same LABEL_PROXIMITY locator its step's
+    # action locator uses, not a ROLE locator -- a ROLE lookup by name resolves to zero
+    # elements for a field with no accessible name and fails replay before the step's
+    # working label_proximity action ever runs.
+    type_step = ExecutedStep(
+        order=1,
+        type="type",
+        description="Type into textbox 'Operator ID:'",
+        precondition={"kind": "url_contains", "description": "on signon page", "url_pattern": "/signon"},
+        postcondition={
+            "kind": "text_contains",
+            "description": "Operator ID field contains teller1",
+            "role": "textbox",
+            "name": "Operator ID:",
+            "expected_value": "teller1",
+            "locator": {"kind": "label_proximity"},
+        },
+        locator={"kind": "label_proximity", "role": "textbox", "name": "Operator ID:", "scope": "page"},
+        input_text="teller1",
+    )
+    run = DiscoveryRun(
+        goal="sign on",
+        target_url="https://web-sample.interface-hiring.com",
+        success=True,
+        reason="done",
+        steps=[type_step],
+        outputs={},
+        parameter_candidates=[],
+        success_condition=_row_visible(),
+    )
+
+    artifact = ArtifactWriter().build(run)
+
+    postcondition = artifact.steps[0].postcondition
+    assert postcondition.locator is not None
+    assert postcondition.locator.kind == LocatorKind.LABEL_PROXIMITY
+    assert postcondition.locator.role == "textbox"
+    assert postcondition.locator.name == "Operator ID:"
 
 
 def test_step_with_no_outcome_mapping_in_discovery_run_gets_empty_list():

@@ -80,6 +80,15 @@ class Condition(BaseModel):
     description: str = Field(description="Human-readable statement of what must be true")
     locator: Optional[Locator] = None
     contains_text: Optional[str] = None
+    exact_match: bool = Field(
+        default=False,
+        description=(
+            "For ROW_VISIBLE/ROW_ABSENT: match a row whose content contains an element with "
+            "EXACTLY `contains_text`, not merely a substring of it. Needed for hierarchical "
+            "identifiers where one row's id is a substring-prefix of another's (e.g. "
+            "'100234-S0001' vs. '100234-S0001-5')."
+        ),
+    )
     expected_value: Optional[str] = None
     url_pattern: Optional[str] = None
     output_field: Optional[str] = Field(
@@ -132,6 +141,7 @@ class Step(BaseModel):
 
     locator: Optional[Locator] = None            # target of click / type / extract
     contains_text: Optional[str] = None           # find_row: text the row must contain (may be "{{param}}")
+    exact_match: bool = False                     # find_row: require an exact (not substring) match, see Condition.exact_match
     input_text: Optional[str] = None              # type: literal or "{{param}}" text to enter
     output_field: Optional[str] = None            # extract: name of the output this step populates
     outcome_mapping: list[OutcomeRule] = Field(

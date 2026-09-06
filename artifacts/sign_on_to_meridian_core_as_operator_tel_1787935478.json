@@ -1,22 +1,22 @@
 {
   "version": "1.0.0",
   "metadata": {
-    "goal": "Sign on to Meridian Core as operator teller1 with password 'password', use Member Inquiry to search by Member Number for 100234, select that member, then on their Shares/Balances page find the share row with Share ID 100234-S0001 and read its Type, Balance, and Status.",
+    "goal": "Sign on to Meridian Core as operator teller1 with password 'password', search Member Number 100234, select the member, click Funds Transfer, leave From Share and To Share on the same share, enter amount 10, and click Continue.",
     "target_url": "https://web-sample.interface-hiring.com",
-    "created_at": "2026-08-27T04:17:10.267857Z"
+    "created_at": "2026-08-28T16:44:38.455771Z"
   },
   "scope_selector": null,
   "parameters": [
     {
       "name": "operator_id",
       "type": "string",
-      "description": "Operator ID for sign-on",
+      "description": "Operator ID for sign on",
       "example_value": "teller1"
     },
     {
       "name": "password",
       "type": "string",
-      "description": "Operator password for sign-on",
+      "description": "Operator password for sign on",
       "example_value": "password"
     },
     {
@@ -24,77 +24,79 @@
       "type": "string",
       "description": "Member number to search",
       "example_value": "100234"
-    }
-  ],
-  "outputs": [
-    {
-      "name": "type",
-      "type": "string",
-      "description": "Extract type from {'kind': 'table_cell_by_column', 'column_index': 1, 'scope': 'row'}"
     },
     {
-      "name": "balance",
+      "name": "amount",
       "type": "string",
-      "description": "Extract balance from {'kind': 'table_cell_by_column', 'column_index': 2, 'scope': 'row'}"
-    },
-    {
-      "name": "status",
-      "type": "string",
-      "description": "Extract status from {'kind': 'table_cell_by_column', 'column_index': 3, 'scope': 'row'}"
+      "description": "Funds transfer amount",
+      "example_value": "10"
     }
   ],
+  "outputs": [],
   "steps": [
     {
       "order": 0,
-      "type": "type",
-      "description": "Type into textbox 'Operator ID:'",
+      "type": "find_row",
+      "description": "Find the row containing 'OPERATOR SIGN ON'",
       "precondition": {
-        "kind": "element_visible",
-        "description": "Operator ID input is visible",
-        "locator": {
-          "kind": "role",
-          "role": "textbox",
-          "name": "Operator ID:",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
+        "kind": "url_contains",
+        "description": "On signon page",
+        "locator": null,
         "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/signon",
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "row_visible",
+        "description": "OPERATOR SIGN ON row is visible",
+        "locator": null,
+        "contains_text": "OPERATOR SIGN ON",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": null,
+      "contains_text": "OPERATOR SIGN ON",
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 1,
+      "type": "type",
+      "description": "Type into textbox 'Operator ID'",
+      "precondition": {
+        "kind": "row_visible",
+        "description": "OPERATOR SIGN ON row is visible",
+        "locator": null,
+        "contains_text": "OPERATOR SIGN ON",
         "expected_value": null,
         "url_pattern": null,
         "output_field": null,
         "expected_type": null
       },
       "postcondition": {
-        "kind": "text_contains",
-        "description": "Operator ID input contains teller1",
-        "locator": {
-          "kind": "role",
-          "role": "textbox",
-          "name": "Operator ID:",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
+        "kind": "url_contains",
+        "description": "Page is still on signon page",
+        "locator": null,
         "contains_text": null,
-        "expected_value": "{{operator_id}}",
-        "url_pattern": null,
+        "expected_value": null,
+        "url_pattern": "/signon",
         "output_field": null,
         "expected_type": null
       },
       "locator": {
         "kind": "label_proximity",
         "role": "textbox",
-        "name": "Operator ID:",
+        "name": "Operator ID",
         "name_match": "exact",
         "column_header": null,
         "column_index": null,
         "css_selector": null,
-        "scope": "page"
+        "scope": "row"
       },
       "contains_text": null,
       "input_text": "{{operator_id}}",
@@ -102,16 +104,26 @@
       "outcome_mapping": []
     },
     {
-      "order": 1,
+      "order": 2,
       "type": "type",
-      "description": "Type into textbox 'Password:'",
+      "description": "Type into textbox 'Password'",
       "precondition": {
+        "kind": "row_visible",
+        "description": "Operator ID teller1 is entered",
+        "locator": null,
+        "contains_text": "Operator ID: teller1",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
         "kind": "element_visible",
-        "description": "Password input is visible",
+        "description": "Password entered in textbox",
         "locator": {
           "kind": "role",
           "role": "textbox",
-          "name": "Password:",
+          "name": "Password",
           "name_match": "exact",
           "column_header": null,
           "column_index": null,
@@ -124,34 +136,15 @@
         "output_field": null,
         "expected_type": null
       },
-      "postcondition": {
-        "kind": "text_contains",
-        "description": "Password input contains password",
-        "locator": {
-          "kind": "role",
-          "role": "textbox",
-          "name": "Password:",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
-        "contains_text": null,
-        "expected_value": "{{password}}",
-        "url_pattern": null,
-        "output_field": null,
-        "expected_type": null
-      },
       "locator": {
         "kind": "label_proximity",
         "role": "textbox",
-        "name": "Password:",
+        "name": "Password",
         "name_match": "exact",
         "column_header": null,
         "column_index": null,
         "css_selector": null,
-        "scope": "page"
+        "scope": "row"
       },
       "contains_text": null,
       "input_text": "{{password}}",
@@ -159,7 +152,7 @@
       "outcome_mapping": []
     },
     {
-      "order": 2,
+      "order": 3,
       "type": "click",
       "description": "Click button 'Sign On'",
       "precondition": {
@@ -182,12 +175,12 @@
         "expected_type": null
       },
       "postcondition": {
-        "kind": "element_visible",
-        "description": "User navigates away from signon or reaches main page",
+        "kind": "element_not_visible",
+        "description": "OPERATOR SIGN ON header is no longer visible",
         "locator": {
           "kind": "role",
           "role": "heading",
-          "name": "MAIN MENU",
+          "name": "OPERATOR SIGN ON",
           "name_match": "exact",
           "column_header": null,
           "column_index": null,
@@ -208,7 +201,7 @@
         "column_header": null,
         "column_index": null,
         "css_selector": null,
-        "scope": "page"
+        "scope": "row"
       },
       "contains_text": null,
       "input_text": null,
@@ -216,23 +209,44 @@
       "outcome_mapping": []
     },
     {
-      "order": 3,
+      "order": 4,
+      "type": "find_row",
+      "description": "Find the row containing 'Main Menu · Member Inquiry'",
+      "precondition": {
+        "kind": "url_contains",
+        "description": "On main menu page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/menu",
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "row_visible",
+        "description": "Header links row is visible",
+        "locator": null,
+        "contains_text": "Main Menu · Member Inquiry",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": null,
+      "contains_text": "Main Menu · Member Inquiry",
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 5,
       "type": "click",
       "description": "Click link 'Member Inquiry'",
       "precondition": {
-        "kind": "element_visible",
-        "description": "Member Inquiry link visible",
-        "locator": {
-          "kind": "role",
-          "role": "link",
-          "name": "Member Inquiry",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
-        "contains_text": null,
+        "kind": "row_visible",
+        "description": "Header links row is visible",
+        "locator": null,
+        "contains_text": "Main Menu · Member Inquiry",
         "expected_value": null,
         "url_pattern": null,
         "output_field": null,
@@ -240,7 +254,7 @@
       },
       "postcondition": {
         "kind": "url_contains",
-        "description": "Navigated to Member Inquiry page",
+        "description": "Navigated to members page",
         "locator": null,
         "contains_text": null,
         "expected_value": null,
@@ -256,121 +270,7 @@
         "column_header": null,
         "column_index": null,
         "css_selector": null,
-        "scope": "page"
-      },
-      "contains_text": null,
-      "input_text": null,
-      "output_field": null,
-      "outcome_mapping": []
-    },
-    {
-      "order": 4,
-      "type": "type",
-      "description": "Type into textbox 'Value:'",
-      "precondition": {
-        "kind": "element_visible",
-        "description": "Value input is visible",
-        "locator": {
-          "kind": "role",
-          "role": "textbox",
-          "name": "Value:",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
-        "contains_text": null,
-        "expected_value": null,
-        "url_pattern": null,
-        "output_field": null,
-        "expected_type": null
-      },
-      "postcondition": {
-        "kind": "text_contains",
-        "description": "Value textbox contains 100234",
-        "locator": {
-          "kind": "role",
-          "role": "textbox",
-          "name": "Value:",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
-        "contains_text": null,
-        "expected_value": "{{member_number}}",
-        "url_pattern": null,
-        "output_field": null,
-        "expected_type": null
-      },
-      "locator": {
-        "kind": "label_proximity",
-        "role": "textbox",
-        "name": "Value:",
-        "name_match": "exact",
-        "column_header": null,
-        "column_index": null,
-        "css_selector": null,
-        "scope": "page"
-      },
-      "contains_text": null,
-      "input_text": "{{member_number}}",
-      "output_field": null,
-      "outcome_mapping": []
-    },
-    {
-      "order": 5,
-      "type": "click",
-      "description": "Click button 'Search'",
-      "precondition": {
-        "kind": "element_visible",
-        "description": "Search button is visible",
-        "locator": {
-          "kind": "role",
-          "role": "button",
-          "name": "Search",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
-        "contains_text": null,
-        "expected_value": null,
-        "url_pattern": null,
-        "output_field": null,
-        "expected_type": null
-      },
-      "postcondition": {
-        "kind": "text_contains",
-        "description": "Search results or member list displayed containing 100234",
-        "locator": {
-          "kind": "role",
-          "role": "heading",
-          "name": "MEMBER INQUIRY / SELECTION",
-          "name_match": "exact",
-          "column_header": null,
-          "column_index": null,
-          "css_selector": null,
-          "scope": "page"
-        },
-        "contains_text": null,
-        "expected_value": "{{member_number}}",
-        "url_pattern": null,
-        "output_field": null,
-        "expected_type": null
-      },
-      "locator": {
-        "kind": "role",
-        "role": "button",
-        "name": "Search",
-        "name_match": "exact",
-        "column_header": null,
-        "column_index": null,
-        "css_selector": null,
-        "scope": "page"
+        "scope": "row"
       },
       "contains_text": null,
       "input_text": null,
@@ -379,11 +279,90 @@
     },
     {
       "order": 6,
-      "type": "click",
-      "description": "Click link 'Select'",
+      "type": "type",
+      "description": "Type into textbox 'Value'",
       "precondition": {
+        "kind": "url_contains",
+        "description": "On members inquiry page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "url_contains",
+        "description": "Page is still on members page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": {
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Value",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "row"
+      },
+      "contains_text": null,
+      "input_text": "{{member_number}}",
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 7,
+      "type": "find_row",
+      "description": "Find the row containing 'MEMBER INQUIRY / SELECTION'",
+      "precondition": {
+        "kind": "url_contains",
+        "description": "On members inquiry page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members",
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "row_visible",
+        "description": "Member Inquiry section is visible",
+        "locator": null,
+        "contains_text": "MEMBER INQUIRY / SELECTION",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": null,
+      "contains_text": "MEMBER INQUIRY / SELECTION",
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 8,
+      "type": "click",
+      "description": "Click button 'Search'",
+      "precondition": {
+        "kind": "row_visible",
+        "description": "Member Inquiry row is visible",
+        "locator": null,
+        "contains_text": "MEMBER INQUIRY / SELECTION",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
         "kind": "element_visible",
-        "description": "Select link is visible",
+        "description": "Search result loaded",
         "locator": {
           "kind": "role",
           "role": "link",
@@ -400,9 +379,38 @@
         "output_field": null,
         "expected_type": null
       },
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Search",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "row"
+      },
+      "contains_text": null,
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 9,
+      "type": "click",
+      "description": "Click link 'Select'",
+      "precondition": {
+        "kind": "row_visible",
+        "description": "Member Inquiry section is visible",
+        "locator": null,
+        "contains_text": "MEMBER INQUIRY / SELECTION",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
       "postcondition": {
         "kind": "url_contains",
-        "description": "Navigated to member details page for 100234",
+        "description": "Navigated to member 100234 details page",
         "locator": null,
         "contains_text": null,
         "expected_value": null,
@@ -418,7 +426,7 @@
         "column_header": null,
         "column_index": null,
         "css_selector": null,
-        "scope": "page"
+        "scope": "row"
       },
       "contains_text": null,
       "input_text": null,
@@ -426,16 +434,46 @@
       "outcome_mapping": []
     },
     {
-      "order": 7,
+      "order": 10,
       "type": "find_row",
-      "description": "Find the row containing '100234-S0001'",
+      "description": "Find the row containing 'Funds Transfer'",
+      "precondition": {
+        "kind": "url_contains",
+        "description": "On member record page",
+        "locator": null,
+        "contains_text": null,
+        "expected_value": null,
+        "url_pattern": "/members/100234",
+        "output_field": null,
+        "expected_type": null
+      },
+      "postcondition": {
+        "kind": "row_visible",
+        "description": "Actions section row is visible",
+        "locator": null,
+        "contains_text": "Funds Transfer",
+        "expected_value": null,
+        "url_pattern": null,
+        "output_field": null,
+        "expected_type": null
+      },
+      "locator": null,
+      "contains_text": "Funds Transfer",
+      "input_text": null,
+      "output_field": null,
+      "outcome_mapping": []
+    },
+    {
+      "order": 11,
+      "type": "click",
+      "description": "Click link 'Funds Transfer'",
       "precondition": {
         "kind": "element_visible",
-        "description": "Member Record page with Shares/Balances table is displayed",
+        "description": "Funds Transfer link is visible",
         "locator": {
           "kind": "role",
-          "role": "heading",
-          "name": "MEMBER RECORD",
+          "role": "link",
+          "name": "Funds Transfer",
           "name_match": "exact",
           "column_header": null,
           "column_index": null,
@@ -449,160 +487,134 @@
         "expected_type": null
       },
       "postcondition": {
-        "kind": "row_visible",
-        "description": "Share row 100234-S0001 is visible",
+        "kind": "url_contains",
+        "description": "Navigated to funds transfer page for member 100234",
         "locator": null,
-        "contains_text": "100234-S0001",
-        "exact_match": true,
+        "contains_text": null,
         "expected_value": null,
-        "url_pattern": null,
+        "url_pattern": "/members/100234/transfer",
         "output_field": null,
         "expected_type": null
       },
-      "locator": null,
-      "contains_text": "100234-S0001",
-      "exact_match": true,
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "Funds Transfer",
+        "name_match": "exact",
+        "column_header": null,
+        "column_index": null,
+        "css_selector": null,
+        "scope": "row"
+      },
+      "contains_text": null,
       "input_text": null,
       "output_field": null,
       "outcome_mapping": []
     },
     {
-      "order": 8,
-      "type": "extract",
-      "description": "Extract type from {'kind': 'table_cell_by_column', 'column_index': 1, 'scope': 'row'}",
+      "order": 12,
+      "type": "type",
+      "description": "Type into textbox 'Amount'",
       "precondition": {
-        "kind": "row_visible",
-        "description": "Share row 100234-S0001 is visible",
+        "kind": "url_contains",
+        "description": "On funds transfer page",
         "locator": null,
-        "contains_text": "100234-S0001",
-        "exact_match": true,
+        "contains_text": null,
         "expected_value": null,
-        "url_pattern": null,
+        "url_pattern": "/members/100234/transfer",
         "output_field": null,
         "expected_type": null
       },
       "postcondition": {
-        "kind": "value_extracted",
-        "description": "type was extracted as a non-empty string value",
+        "kind": "url_contains",
+        "description": "Page is still on funds transfer page",
         "locator": null,
         "contains_text": null,
         "expected_value": null,
-        "url_pattern": null,
-        "output_field": "type",
-        "expected_type": "string"
+        "url_pattern": "/members/100234/transfer",
+        "output_field": null,
+        "expected_type": null
       },
       "locator": {
-        "kind": "table_cell_by_column",
-        "role": null,
-        "name": null,
+        "kind": "label_proximity",
+        "role": "textbox",
+        "name": "Amount",
         "name_match": "exact",
         "column_header": null,
-        "column_index": 1,
+        "column_index": null,
         "css_selector": null,
         "scope": "row"
       },
       "contains_text": null,
-      "input_text": null,
-      "output_field": "type",
+      "input_text": "{{amount}}",
+      "output_field": null,
       "outcome_mapping": []
     },
     {
-      "order": 9,
-      "type": "extract",
-      "description": "Extract balance from {'kind': 'table_cell_by_column', 'column_index': 2, 'scope': 'row'}",
+      "order": 13,
+      "type": "click",
+      "description": "Click button 'Continue'",
       "precondition": {
-        "kind": "row_visible",
-        "description": "Share row 100234-S0001 is visible",
-        "locator": null,
-        "contains_text": "100234-S0001",
-        "exact_match": true,
+        "kind": "element_visible",
+        "description": "Continue button is visible",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Continue",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
+        "contains_text": null,
         "expected_value": null,
         "url_pattern": null,
         "output_field": null,
         "expected_type": null
       },
       "postcondition": {
-        "kind": "value_extracted",
-        "description": "balance was extracted as a non-empty string value",
-        "locator": null,
+        "kind": "element_visible",
+        "description": "Clicked continue button",
+        "locator": {
+          "kind": "role",
+          "role": "button",
+          "name": "Continue",
+          "name_match": "exact",
+          "column_header": null,
+          "column_index": null,
+          "css_selector": null,
+          "scope": "page"
+        },
         "contains_text": null,
-        "expected_value": null,
-        "url_pattern": null,
-        "output_field": "balance",
-        "expected_type": "string"
-      },
-      "locator": {
-        "kind": "table_cell_by_column",
-        "role": null,
-        "name": null,
-        "name_match": "exact",
-        "column_header": null,
-        "column_index": 2,
-        "css_selector": null,
-        "scope": "row"
-      },
-      "contains_text": null,
-      "input_text": null,
-      "output_field": "balance",
-      "outcome_mapping": []
-    },
-    {
-      "order": 10,
-      "type": "extract",
-      "description": "Extract status from {'kind': 'table_cell_by_column', 'column_index': 3, 'scope': 'row'}",
-      "precondition": {
-        "kind": "row_visible",
-        "description": "Share row 100234-S0001 is visible",
-        "locator": null,
-        "contains_text": "100234-S0001",
-        "exact_match": true,
         "expected_value": null,
         "url_pattern": null,
         "output_field": null,
         "expected_type": null
       },
-      "postcondition": {
-        "kind": "value_extracted",
-        "description": "status was extracted as a non-empty string value",
-        "locator": null,
-        "contains_text": null,
-        "expected_value": null,
-        "url_pattern": null,
-        "output_field": "status",
-        "expected_type": "string"
-      },
       "locator": {
-        "kind": "table_cell_by_column",
-        "role": null,
-        "name": null,
+        "kind": "role",
+        "role": "button",
+        "name": "Continue",
         "name_match": "exact",
         "column_header": null,
-        "column_index": 3,
+        "column_index": null,
         "css_selector": null,
         "scope": "row"
       },
       "contains_text": null,
       "input_text": null,
-      "output_field": "status",
+      "output_field": null,
       "outcome_mapping": []
     }
   ],
   "success_condition": {
-    "kind": "element_visible",
-    "description": "Member Record page is displayed with Shares/Balances table",
-    "locator": {
-      "kind": "role",
-      "role": "heading",
-      "name": "MEMBER RECORD",
-      "name_match": "exact",
-      "column_header": null,
-      "column_index": null,
-      "css_selector": null,
-      "scope": "page"
-    },
+    "kind": "url_contains",
+    "description": "Navigated to funds transfer review page",
+    "locator": null,
     "contains_text": null,
     "expected_value": null,
-    "url_pattern": null,
+    "url_pattern": "/members/100234/transfer/review",
     "output_field": null,
     "expected_type": null
   }

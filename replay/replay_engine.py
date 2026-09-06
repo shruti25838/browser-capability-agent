@@ -293,7 +293,7 @@ class ReplayEngine:
         if step.type == StepType.FIND_ROW:
             if not contains_text:
                 raise ValueError("find_row step has no contains_text to search for")
-            return self.perceiver.find_row(contains_text)
+            return self.perceiver.find_row(contains_text, exact=step.exact_match)
 
         if locator is not None and locator.scope == "row" and current_row is None:
             raise ValueError("row-scoped locator used before any find_row step established a row")
@@ -330,7 +330,23 @@ class ReplayEngine:
             return base.get_by_role("cell").nth(idx)
         if locator.kind == LocatorKind.ROLE:
             if locator.name:
-                return base.get_by_role(locator.role, name=locator.name, exact=(locator.name_match == NameMatch.EXACT))
+                target = base.get_by_role(locator.role, name=locator.name, exact=(locator.name_match == NameMatch.EXACT))
+                if target.count() == 0:
+                    # Legacy-unlabeled-field fallback: some recorded artifacts have their
+                    # precondition/postcondition locators saved as ROLE+name for fields (e.g.
+                    # MERIDIAN's "Operator ID:" input) that actually have no accessible name at
+                    # all -- only the step's own action locator was correctly saved as
+                    # LABEL_PROXIMITY. Before giving up, try resolving the same name by label
+                    # proximity so these older artifacts keep working without re-recording. If
+                    # that also finds nothing (or raises), fall through to the original empty
+                    # role locator so the caller still sees count=0 and reports honestly.
+                    try:
+                        fallback = self.perceiver.resolve_input_by_label(locator.name, locator.role)
+                        if fallback.count() > 0:
+                            return fallback
+                    except Exception:
+                        pass
+                return target
             return base.get_by_role(locator.role)
         if locator.kind == LocatorKind.CSS:
             return base.locator(locator.css_selector)
@@ -359,7 +375,7 @@ class ReplayEngine:
 
             if kind in (ConditionKind.ROW_VISIBLE, ConditionKind.ROW_ABSENT):
                 text = condition.contains_text or ""
-                count = self.perceiver.find_row(text).count()
+                count = self.perceiver.find_row(text, exact=condition.exact_match).count()
                 observed = f"rows matching {text!r}: {count}"
                 if kind == ConditionKind.ROW_VISIBLE:
                     if count > 1:
@@ -424,11 +440,35 @@ class ReplayEngine:
         base = current_row if condition.locator.scope == "row" else self.perceiver.root
         target = self._resolve_target(condition.locator, base)
         count = target.count()
-        if count != 1:
-            return ConditionCheck(False, f"expected exactly one element, found {count}")
-        text_value = target.first.inner_text(timeout=CHECK_TIMEOUT_MS).strip()
-        observed = f"text={text_value!r}"
-        return ConditionCheck((expected in text_value) if contains else (text_value == expected), observed)
+
+        element_matched = False
+        element_observed = f"expected exactly one element, found {count}"
+        if count == 1:
+            try:
+                # Form fields (input/textarea/select) keep their typed/selected value in the
+                # `value` property, not inner text -- inner_text() would read an empty string
+                # even when the field is correctly filled. input_value() errors on non-form
+                # elements, so fall back to inner_text() for those.
+                text_value = target.first.input_value(timeout=CHECK_TIMEOUT_MS).strip()
+            except PlaywrightError:
+                text_value = target.first.inner_text(timeout=CHECK_TIMEOUT_MS).strip()
+            element_observed = f"text={text_value!r}"
+            element_matched = (expected in text_value) if contains else (text_value == expected)
+
+        if element_matched:
+            return ConditionCheck(True, element_observed)
+
+        # The locator's own element didn't satisfy this condition (or wasn't unique) --
+        # discovery sometimes records a locator near, but not at, the content that actually
+        # satisfies this condition (e.g. a heading rather than the results area holding the
+        # expected text elsewhere on the page). Fall back to the scoped root's general
+        # visible text before giving up, mirroring the locator-is-None branch above.
+        page_text_value = self.perceiver.visible_text().strip()
+        page_matched = (expected in page_text_value) if contains else (page_text_value == expected)
+        if page_matched:
+            return ConditionCheck(True, f"page_text (len={len(page_text_value)})")
+
+        return ConditionCheck(False, element_observed)
 
     @staticmethod
     def _value_matches_type(value: str, expected_type: Optional[str]) -> bool:

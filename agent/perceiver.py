@@ -63,14 +63,67 @@ class Perceiver:
         root = self.root if self.root_selector else self.page.locator("body")
         return root.inner_text()
 
-    def find_row(self, contains_text: str):
+    def find_row(self, contains_text: str, exact: bool = False):
         """Locate the table row whose content contains `contains_text`.
 
         Uses Playwright's built-in `has_text` content filter -- never a
         positional selector -- so this survives re-sorting, filtering, and
         new rows being inserted anywhere in the table.
+
+        `exact=True` requires the row's FIRST cell to be EXACTLY
+        `contains_text`, not merely a substring match against the row's full
+        concatenated text. Needed for hierarchical identifiers where one
+        row's id is a substring-prefix of another's (e.g. MERIDIAN share ids
+        "100234-S0001" vs. "100234-S0001-5"/"100234-S0001-6") -- the default
+        substring `has_text` filter would otherwise match every row sharing
+        that prefix, and even a has=get_by_text(exact=True) descendant check
+        can still match a row whose first cell isn't `contains_text` at all
+        (just contains an element with that exact text somewhere inside it).
+
+        First-cell matching is done via raw <tr>/<td>/<th> tags (an XPath
+        fallback, like resolve_input_by_label's), not the "row"/"cell" ARIA
+        roles: some legacy tables nest one <table> inside another (e.g. a
+        single-cell wrapper table used purely for pixel borders), which makes
+        the "row" role match both an outer wrapper row and the inner leaf row
+        for what is visually one row. When that leaves more than one exact
+        first-cell match, the duplicates are collapsed to the row with the
+        most direct-child cells -- the wrapper row typically has only one
+        (the cell wrapping the nested table), while the real data row has one
+        per column.
         """
-        return self.root.get_by_role("row").filter(has_text=contains_text)
+        rows = self.root.get_by_role("row")
+        if not exact:
+            return rows.filter(has_text=contains_text)
+
+        literal = self._xpath_string_literal(contains_text)
+        candidates = self.root.locator(f"xpath=.//tr[normalize-space((.//td|.//th)[1])={literal}]")
+        count = candidates.count()
+        if count <= 1:
+            return candidates
+
+        best_index = max(
+            range(count),
+            key=lambda i: candidates.nth(i).locator("xpath=./td|./th").count(),
+        )
+        return candidates.nth(best_index)
+
+    @staticmethod
+    def _xpath_string_literal(value: str) -> str:
+        """Safely quote `value` for embedding in an XPath 1.0 expression.
+
+        XPath 1.0 has no escape character, so a value containing both quote
+        kinds needs concat() instead of a single quoted literal.
+        """
+        if "'" not in value:
+            return f"'{value}'"
+        if '"' not in value:
+            return f'"{value}"'
+        tokens = []
+        for i, part in enumerate(value.split("'")):
+            if i:
+                tokens.append("\"'\"")
+            tokens.append(f"'{part}'")
+        return "concat(" + ", ".join(tokens) + ")"
 
     def resolve_column_index(self, column_header: str) -> int:
         """Find which column a header text corresponds to, by content match.
